@@ -1,5 +1,6 @@
 module
 
+public import CaccettaHaggkvist.FiniteOrders
 public import CaccettaHaggkvist.IntervalM6Bridge
 public import CaccettaHaggkvist.PatternPacking
 public import CaccettaHaggkvist.RainbowBounds

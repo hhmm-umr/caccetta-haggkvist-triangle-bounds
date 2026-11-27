@@ -20,11 +20,8 @@ from fractions import Fraction
 from exact_certificate import gram_matrix, integer, read_records, require
 
 
-def verify_ext_cert(flags_bin: str, ext_bin: str, cert_json: str) -> bool:
-    t0 = time.monotonic()
-    with open(cert_json, "r") as f:
-        cert = json.load(f)
-
+def product_table_endpoints(flags_bin, ext_bin, cert):
+    """Evaluate every representative at both endpoints using only the counting tables."""
     m = integer(cert["m"])
     nM = integer(cert["num_models"])
     c_low = Fraction(integer(cert["c_low_num"]), integer(cert["c_low_den"]))
@@ -238,11 +235,21 @@ def verify_ext_cert(flags_bin: str, ext_bin: str, cert_json: str) -> bool:
                             S[h] += qab * (cchi * m_chi + css * m_ss + cone * m_one)
         require(ei == len(Q_ext), "unused weighted SOS blocks")
 
-        bad = sum(1 for v in S if v >= 0)
-        return Fraction(max(S), lcm_d * q_denom), bad
+        denominator = lcm_d * q_denom
+        return [Fraction(value, denominator) for value in S]
 
-    max_lo, bad_lo = eval_at(c_low)
-    max_hi, bad_hi = eval_at(c_high)
+    return (c_low, eval_at(c_low)), (c_high, eval_at(c_high))
+
+
+def verify_ext_cert(flags_bin: str, ext_bin: str, cert_json: str) -> bool:
+    t0 = time.monotonic()
+    with open(cert_json) as f:
+        cert = json.load(f)
+    (c_low, low), (c_high, high) = product_table_endpoints(flags_bin, ext_bin, cert)
+    max_lo, max_hi = max(low), max(high)
+    bad_lo, bad_hi = sum(v >= 0 for v in low), sum(v >= 0 for v in high)
+    m, nM, q_denom = cert["m"], len(low), cert["q_denom"]
+    alpha = Fraction(integer(cert["alpha_num"]), integer(cert["alpha_den"]))
     elapsed = time.monotonic() - t0
     print(f"[INDEPENDENT EXT EXACT VERIFIER] m={m}, interval=[{c_low}, {c_high}] ([{float(c_low):.6f}, {float(c_high):.6f}]), alpha={alpha}")
     print(f"  models={nM}, rank={cert['rank_base']}+{cert['rank_ext']}, nnz_mu={len(cert['mu_sparse'])}, q_denom={q_denom}")
@@ -250,6 +257,13 @@ def verify_ext_cert(flags_bin: str, ext_bin: str, cert_json: str) -> bool:
     print(f"  endpoint c_high = {c_high}: max S(H) = {max_hi} ({float(max_hi):.6e}), violations = {bad_hi}/{nM}")
     print(f"  verified in {elapsed:.2f}s")
     if bad_lo == 0 and bad_hi == 0:
+        if c_low < c_high:
+            # Strict negativity at the upper endpoint leaves only decreasing rows
+            # to constrain an extension to the left. Interpolate their first zeros.
+            frontier = max(((c_low + lo * (c_high - c_low) / (lo - hi), i)
+                            for i, (lo, hi) in enumerate(zip(low, high)) if hi < lo), default=None)
+            if frontier is not None:
+                print(f"  lower boundary = {frontier[0]}; active representative (zero-based) = {frontier[1]}")
         print("  >>> 100% EXACT TWO-ENDPOINT INTERVAL CERTIFICATE VERIFIED!! <<<")
         return True
     print("  >>> VERIFICATION FAILED! <<<")

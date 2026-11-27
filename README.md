@@ -1,6 +1,6 @@
 # Triangle bounds for the Caccetta–Häggkvist conjecture
 
-If a loopless digraph on $n\ge1$ vertices has minimum out-degree at least $0.33823n$, it contains a directed cycle of length two or three. In an oriented graph the cycle is a triangle. Two exact six-vertex certificates give the sharper bound $c^*\le491353450461462518/1452728700789264675\approx0.3382279500601$ on the supremum of the minimum out-degree ratio of triangle-free oriented graphs. The strongest general CH threshold proved end to end in this repository's default Lean build is $3415403/10000000=0.3415403$. The conjectured threshold is $1/3$. [Proof and verification status](PROOF.md)
+In a loopless digraph on $n\ge1$ vertices, minimum out-degree at least $0.33823n$ forces a digon or a directed triangle. In an oriented graph the cycle is a triangle. Two exact six-vertex certificates give the sharper bound $c^*\le491353450461462518/1452728700789264675\approx0.3382279500601$, where $c^*$ is the supremum of the minimum out-degree ratio of triangle-free oriented graphs. The five-vertex Lean theorem proves the threshold $3415403/10000000=0.3415403$. The conjectured threshold is $1/3$. [Proof and exact certificates](PROOF.md)
 
 Hladký, Král’ and Norin proved the bound $0.3465$ and reported a six-vertex calculation at $0.3388$ by de Joannis de Verclos, Sereni and Volec. Samuel Burbulla’s public Lean project states an unconditional bound of $679/2000=0.3395$. [Hladký–Král’–Norin, concluding remarks](https://arxiv.org/pdf/0908.2791) · [Burbulla’s formalization](https://github.com/samuelburbulla/caccetta-haggkvist-bound)
 
@@ -9,6 +9,7 @@ Hladký, Král’ and Norin proved the bound $0.3465$ and reported a six-vertex 
 | Result | Hypotheses and conclusion | Source |
 | --- | --- | --- |
 | Five-vertex CH bound | $\delta^+(G) \ge (3415403/10000000)n$ implies a digon or a directed triangle. | [Five-vertex interval theorem](lean/CaccettaHaggkvist/CertM5Refined.lean) |
+| One-third threshold at finite orders | Minimum out-degree at least $n/3$ forces a digon or triangle for every $n\le41$, for $n\equiv1\pmod3$ through 121, and for $n\equiv2\pmod3$ through 80. | [Finite-order theorem](lean/CaccettaHaggkvist/FiniteOrders.lean) |
 | Feedback arc sets | If $G$ has neither a digon nor a directed triangle, $1250\beta(G)\le1037\gamma(G)$. Here $\beta$ is the minimum number of arcs whose deletion makes $G$ acyclic and $\gamma$ counts unordered nonadjacent pairs. | [CSS bound and digraph wrapper](lean/CaccettaHaggkvist/CSS83.lean) |
 | Exact one-third bound for a class of graphs | A directed-triangle-free oriented graph avoiding the four specified five-vertex patterns has a vertex $v$ with $3d^+(v)\le n-1$. For general triangle-free oriented graphs of minimum out-degree $d$, there are $k$ vertex-disjoint obstructions with $3d+1\le n+10k$. | [Four-pattern theorem](lean/CaccettaHaggkvist/RazborovSharp.lean) · [Packing bound](lean/CaccettaHaggkvist/PatternPacking.lean) |
 | Rainbow triangles | In a simple edge-colored graph on $n\ge1$ vertices, at least $n$ colors with each color class of size at least $(199311/500000)n = 0.398622n$ force a rainbow triangle. This uses the five-vertex CH theorem. | [Unconditional rainbow theorem](lean/CaccettaHaggkvist/RainbowBounds.lean) |
@@ -28,13 +29,13 @@ The verifier forms integer Gram matrices from the SOS factors and evaluates each
 | 6 | $[33827/100000,427/1250]$ | 6,583 | 1,305 + 45 | $-5.16066\times10^{-9}$, $-8.37545\times10^{-9}$ |
 | 6 | $[33823/100000,33827/100000]$ | 6,583 | 1,719 + 101 | $-3.36155\times10^{-9}$, $-3.75343\times10^{-9}$ |
 
-The maxima are rounded here. The product-table verifier regenerates the flag counts, and an independent evaluator reconstructs each sum from adjacency with all 720 orderings and their multiplicities. Both verify the endpoint fractions for all four six-vertex certificates. The last two rows form the chain from $0.3416$ to $0.33823$. Extending the last certificate to its first zero gives the stated rational bound on $c^*$. [Exact margins and interval argument](PROOF.md#42-exact-certificate-margins) · [Direct evaluator](solver/verify_six_vertex.py)
+The maxima are rounded here. The product-table verifier regenerates the flag counts, and an independent evaluator reconstructs each sum from adjacency with all 720 orderings and their multiplicities. The verification command checks agreement at both endpoints for every one of the 26,332 certificate/model pairs. This determines each entire affine row. The last two rows form the chain from $0.3416$ to $0.33823$. Extending the last certificate to its first zero gives the stated rational bound on $c^*$. [Exact margins and interval argument](PROOF.md#42-exact-certificate-margins) · [Direct evaluator](solver/verify_six_vertex.py)
 
-The Lean certificate compiler encodes the actual flag coefficients, checks the Gram matrices against their signed integer factors, and derives the expectation inequality for the resulting program. The 35 Gram blocks at $0.3385$ and the 42 at $0.3383$ have all passed the kernel check. The outstanding step for those concrete Lean theorems is the kernel evaluation of the endpoint inequalities over all 6,583 representatives. The six-vertex numerical claims above use the external exact evaluations. [Compiler](solver/compile_six_vertex.py) · [Program soundness](lean/CaccettaHaggkvist/SixVertexProgram.lean) · [Finite check and CH theorem](lean/CaccettaHaggkvist/SixVertexBound.lean)
+The six-vertex bound also implies the exact one-third threshold for every $n\le71$, for $n\equiv1\pmod3$ through 205, and for $n\equiv2\pmod3$ through 137. Lean proves the rounding implication with $c^*\le33823/100000$ as its explicit hypothesis. [Finite-order calculation](PROOF.md#44-the-one-third-threshold-at-finite-orders)
 
 ## Reproduce
 
-With Git and the Elan toolchain manager installed, run the following from the repository root. The project pins Lean and Mathlib to 4.36.0. On an 11 GiB server the project builds with two Lean worker threads. A fresh project build can take tens of minutes.
+The project pins Lean and Mathlib to 4.36.0. With Git and Elan installed, build the Lean library and audit the public theorems from the repository root.
 
 ```sh
 cd lean
@@ -49,25 +50,14 @@ From the repository root, regenerate the five- and six-vertex flag tables and ru
 bash solver/verify_chain.sh
 ```
 
-The script rebuilds the counting tables on the CPU, checks the rational certificates, and cross-checks the six-vertex coefficients directly from adjacency. The direct check also validates every extension witness. [Certificate checker](solver/verify_six_vertex.py) · [Witness generator](solver/gen_canon_witnesses.cpp)
+The script rebuilds the product tables, checks the extension witnesses and compares each six-vertex coefficient against a calculation from adjacency. [Product-table evaluator](solver/verify_ext_cert_independent.py) · [Adjacency evaluator](solver/verify_six_vertex.py)
 
-To reproduce the 77 concrete Gram checks, run the following from the repository root. The compiler reads the flag identifiers and writes the certificate-specific Lean modules to Git-ignored directories.
+Count the four critical patterns in the canonical models and evaluate the rational parameters in the feedback-arc proof with the following commands.
 
 ```sh
-work=$(mktemp -d)
-g++ -std=c++17 -O3 -fopenmp solver/flag_gen.cpp -o "$work/flags"
-g++ -std=c++17 -O3 -fopenmp solver/flag_gen_ext.cpp -o "$work/ext"
-"$work/flags" dump 6 "$work"
-"$work/ext" "$work/flags_m6.bin" "$work/ext_m6.bin"
-python3 solver/compile_six_vertex.py certs/cert_m6_css83_nosos_677_2000_to_427_1250.json \
-    "$work/flags_m6.bin" "$work/ext_m6.bin" lean/CaccettaHaggkvist Plain3385
-python3 solver/compile_six_vertex.py certs/cert_m6_css83_sos_3383_10000_to_427_1250.json \
-    "$work/flags_m6.bin" "$work/ext_m6.bin" lean/CaccettaHaggkvist Weighted3383
-cd lean
-LEAN_NUM_THREADS=2 lake --wfail build CaccettaHaggkvist.Plain3385.Valid CaccettaHaggkvist.Weighted3383.Valid
+python3 solver/count_critical_patterns.py
+python3 solver/css_cut_parameters.py 1037/1250 --caps 2128/2715 1387/2765 2783/11060
 ```
-
-Each certificate also has a `Bridge` target proving the CH implication from the finite model checks, and a `Result` target that additionally requests all 6,583 kernel checks. The generated `Rows` modules check 12 representatives apiece by default. Lake can reuse completed modules across invocations. The geometry table is shared by all certificates.
 
 ## License
 

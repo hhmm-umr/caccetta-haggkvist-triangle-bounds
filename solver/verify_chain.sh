@@ -22,9 +22,14 @@ six=("$certs/cert_m6_css83_sos_3383_10000_to_427_1250.json"
      "$certs/cert_m6_css83_nosos_677_2000_to_427_1250.json"
      "$certs/cert_m6_css83_33827_100000_to_427_1250.json"
      "$certs/cert_m6_css1037_33823_100000_to_33827_100000.json")
-for cert in "${six[@]}"; do
-    python3 "$solver/verify_ext_cert_independent.py" "$work/flags_m6.bin" "$work/ext_m6.bin" \
-        "$cert"
-done
-python3 "$solver/verify_six_vertex.py" "$certs/canon_witnesses_m6.json" \
-    "$work/flags_m6.bin" "$work/ext_m6.bin" "${six[@]}" --anchor 427/1250
+PYTHONPATH="$solver" python3 - "$certs/canon_witnesses_m6.json" \
+    "$work/flags_m6.bin" "$work/ext_m6.bin" "${six[@]}" <<'PY'
+import sys
+from fractions import Fraction
+from pathlib import Path
+from verify_ext_cert_independent import product_table_endpoints
+from verify_six_vertex import verify_files
+
+witnesses, flags, extensions, *certificates = map(Path, sys.argv[1:])
+verify_files(witnesses, flags, extensions, certificates, Fraction(427, 1250), product_table_endpoints)
+PY

@@ -271,6 +271,15 @@ class AffineRows:
         numerator = max(endpoint.denominator*u + endpoint.numerator*v for u, v in self.rows)
         return Fraction(numerator, self.denominator * endpoint.denominator)
 
+    def check_at(self, endpoint, reference):
+        require(len(reference) == len(self.rows), "product-table model count mismatch")
+        denominator = self.denominator * endpoint.denominator
+        for i, ((u, v), expected) in enumerate(zip(self.rows, reference)):
+            numerator = endpoint.denominator * u + endpoint.numerator * v
+            if numerator * expected.denominator != expected.numerator * denominator:
+                raise ValueError(f"product-table disagreement at {endpoint}, model {i}: "
+                                 f"adjacency {Fraction(numerator, denominator)}, product table {expected}")
+
     def lower_boundary(self):
         # At the known strictly negative upper endpoint, only negative slopes
         # constrain how far left the interval can extend.
@@ -401,6 +410,26 @@ def extend_upper_bound(anchor, intervals):
     return bound
 
 
+def verify_files(witnesses, flags, extensions, paths, anchor=None, endpoint_reference=None):
+    models = checked_models(witnesses)
+    metadata = flag_ids(flags, extensions)
+    certificates = [json.loads(path.read_bytes()) for path in paths]
+    results, distinct = affine_rows(certificates, models, metadata)
+    print(f"{len(models)} models, {distinct} distinct labelings, {len(models)*720} weighted orderings")
+    intervals = []
+    for path, cert, scores in zip(paths, certificates, results):
+        print(f"Direct six-vertex evaluation: {path.name}", flush=True)
+        lower = verify_rows(cert, scores)
+        if endpoint_reference is not None:
+            for endpoint, reference in endpoint_reference(flags, extensions, cert):
+                scores.check_at(endpoint, reference)
+            print(f"  Product tables agree at both endpoints for all {len(scores.rows)} models.")
+        intervals.append((Fraction(integer(cert["c_high_num"]), integer(cert["c_high_den"])), lower))
+    if anchor is not None:
+        bound = extend_upper_bound(anchor, intervals)
+        print(f"Chained cStar upper bound from {anchor}: {bound} ({float(bound):.12f})")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("witnesses", type=Path)
@@ -409,19 +438,7 @@ def main():
     parser.add_argument("certificates", type=Path, nargs="+")
     parser.add_argument("--anchor", type=Fraction, help="established upper bound for interval chaining")
     args = parser.parse_args()
-    models = checked_models(args.witnesses)
-    metadata = flag_ids(args.flags, args.extensions)
-    certificates = [json.loads(path.read_bytes()) for path in args.certificates]
-    results, distinct = affine_rows(certificates, models, metadata)
-    print(f"{len(models)} models, {distinct} distinct labelings, {len(models)*720} weighted orderings")
-    intervals = []
-    for path, cert, scores in zip(args.certificates, certificates, results):
-        print(f"Direct six-vertex evaluation: {path.name}", flush=True)
-        lower = verify_rows(cert, scores)
-        intervals.append((Fraction(integer(cert["c_high_num"]), integer(cert["c_high_den"])), lower))
-    if args.anchor is not None:
-        bound = extend_upper_bound(args.anchor, intervals)
-        print(f"Chained cStar upper bound from {args.anchor}: {bound} ({float(bound):.12f})")
+    verify_files(args.witnesses, args.flags, args.extensions, args.certificates, args.anchor)
 
 
 if __name__ == "__main__":

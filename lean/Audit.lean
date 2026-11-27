@@ -10,6 +10,8 @@ run_cmd
     ``cStar_le_427_1250, ``OrientedGraph.exists_outDeg_lt_427_1250,
     ``hasCycleLe3_of_minOutDeg_ge_3415403_10000000, ``cStar_le_3415403_10000000,
     ``OrientedGraph.minOutDeg_le_cStar_card_sub_one, ``hasCycleLe3_of_cStar_le,
+    ``hasCycleLe3_of_third_of_order_rounding, ``hasCycleLe3_of_third_of_five_vertex_order,
+    ``hasCycleLe3_of_third_of_six_vertex_order,
     ``cStar_le_of_six_vertex_interval, ``CertificateGram.Packing.sound,
     ``SixVertex.Program.expectation_ge, ``SixVertex.cStar_le_of_program,
     ``SixVertex.fastModelRow_eq, ``SixVertex.permutationTable_checked,

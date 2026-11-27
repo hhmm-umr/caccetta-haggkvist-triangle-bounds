@@ -131,11 +131,13 @@ The independent checker constructs $Q=\sum_j w_j u_j u_j^\top$ with integer vect
 | [Six vertices, 33827/100000 to 427/1250](certs/cert_m6_css83_33827_100000_to_427_1250.json) | 6,583 | $-2252090076367907/436396165064294400000000$ | $-104429035221893/12468461858979840000000$ |
 | [Six vertices, 33823/100000 to 33827/100000](certs/cert_m6_css1037_33823_100000_to_33827_100000.json) | 6,583 | $-93885997554071377/27929354564114841600000000$ | $-69887210502699631/18619569709409894400000000$ |
 
+The $0.33827$ certificate uses $\alpha=83/100$ and adds $7/600$, $3/200$ and $11/600$ to the linear CSS tangents of the $0.3383$ certificate. The $0.33823$ certificate uses $\alpha=1037/1250$ on the shorter interval, adding $1/60$ and $23/1200$ to the linear tangents and $19/1200$ to the weighted tangents. Both certificates have 286 nonzero local linear multipliers. Their common coefficient denominators are $2^{42}$ and $2^{48}$, respectively. [First certificate](certs/cert_m6_css83_33827_100000_to_427_1250.json) · [Second certificate](certs/cert_m6_css1037_33823_100000_to_33827_100000.json)
+
 ### 4.3 The affine score and its Lean program
 
 The direct evaluator checks each one-vertex extension witness. It then reads the flag identifiers and block order, skips the stored product counts, and evaluates the graph functions from adjacency on every permutation of each representative. Averaging over these permutations gives the table in §4.2. [Direct evaluator](solver/verify_six_vertex.py)
 
-Across the 6,583 representatives there are 4,169,935 distinct ordered adjacency codes. Weighting each code by its multiplicity recovers all 4,739,760 orderings. Certificates evaluated together share the adjacency projections. On the same server, one timed invocation for the original pair of six-vertex certificates took 45.17 seconds before these changes and 11.88 seconds after them. Peak resident memory rose from 52,444 to 97,924 KiB. All 13,166 integer intercept/slope pairs for those two certificates agreed with the independently generated product tables.
+The 6,583 representatives have 4,169,935 distinct ordered adjacency codes. Weighting each code by its multiplicity recovers all 4,739,760 orderings. The product-table and adjacency evaluators agree at both endpoints for every certificate and model. These 52,664 exact rational comparisons determine all 26,332 affine rows. [Reproduction command](solver/verify_chain.sh)
 
 For a fixed ordering, write $c$ for the candidate out-degree ratio. The evaluator sums the following four contributions and divides by the common positive coefficient scale `q_denom`.
 
@@ -158,13 +160,32 @@ $$
 
 For the last certificate the evaluator gives $M=46194347230127/140737488355328$ and $B=941512289966121/157625986957967360$. Its lower endpoint has slack below $-3.36\times10^{-9}$. The two consecutive intervals in §4.2 therefore give $c^*\le33823/100000$. This uses the strengthened CSS coefficient $1037/1250$ in the second interval.
 
-For a row $u_H+c v_H$ with $v_H<0$, the leftmost allowed point is $-u_H/v_H$. Rows with nonnegative slope remain strictly negative to the left of the verified upper endpoint. Maximizing the roots over the negative-slope rows of the last certificate gives
-$$L=491353450461462518/1452728700789264675.$$
-Representative 40 (zero-based) has zero slack at $L$. Every row is nonpositive there and strictly negative at $33827/100000$. If $c^*>L$, then $(L+c^*)/2$ is an interior point with a strictly negative maximum. Applying §2.4 from that midpoint to the known upper endpoint gives a contradiction. Thus $c^*\le L$. Applying the lexicographic product of $G$ with a sequence of near extremizers also gives $\delta^+(G)\le c^*(n-1)$, which yields a strict finite ratio at $L>0$. [Interval closure](lean/CaccettaHaggkvist/IntervalM6Bridge.lean) · [Lexicographic product proof](lean/CaccettaHaggkvist/Lexicographic.lean)
+For a row $u_H+c v_H$ with $v_H<0$, its first zero to the left of the verified interval is $-u_H/v_H$. Rows with nonnegative slope stay strictly negative to the left of the upper endpoint. Taking the largest of the roots for the negative-slope rows gives the closed left boundary of each certificate. The representative indices below start at zero.
+
+| Certificate | Closed left boundary | Representative attaining zero |
+| --- | ---: | ---: |
+| Five vertices, $0.3415403$ | $47074619589/137830363400$ | 21 |
+| Six vertices, $0.3385$ | $83899909027/247860545429$ | 4314 |
+| Six vertices, $0.3383$ | $392609880893961/1160547786928600$ | 21 |
+| Six vertices, $0.33827$ | $474335606673465037/1402245759967159800$ | 4316 |
+| Six vertices, $0.33823$ | $491353450461462518/1452728700789264675$ | 40 |
+
+Let $L=491353450461462518/1452728700789264675$. Representative 40 (zero-based) has zero slack at $L$. Every row is nonpositive there and strictly negative at $33827/100000$. If $c^*>L$, then $(L+c^*)/2$ is an interior point with a strictly negative maximum. Applying §2.4 from that midpoint to the known upper endpoint gives a contradiction. Thus $c^*\le L$. Applying the lexicographic product of $G$ with a sequence of near extremizers also gives $\delta^+(G)\le c^*(n-1)$, which yields a strict finite ratio at $L>0$. [Interval closure](lean/CaccettaHaggkvist/IntervalM6Bridge.lean) · [Lexicographic product proof](lean/CaccettaHaggkvist/Lexicographic.lean)
 
 The compiler encodes the degree, linear and Gram terms in a typed program with integer intercept and slope. The degree term in Lean uses the second vertex for the tested arc and the other four free vertices for its flag, a fixed permutation of the order used above. A factorization check validates every Gram entry. Conditional independence and the pointwise localizer inequalities then yield the full expectation estimate via `SixVertex.Program.expectation_ge`. The reflected permutation sum is proved equal to the symmetrized graph score. Given all finite endpoint checks, `SixVertex.cStar_le_of_program` closes the CH bound for any such program. [Gram checks](lean/CaccettaHaggkvist/GramPacking.lean) · [Localizer inequalities](lean/CaccettaHaggkvist/FlagLocalizers.lean) · [Program semantics](lean/CaccettaHaggkvist/SixVertexProgram.lean) · [Reflection](lean/CaccettaHaggkvist/SixVertexReflection.lean)
 
-All 35 Gram blocks of the $0.3385$ program and all 42 of the $0.3383$ program have been checked by the Lean kernel. The 6,583 endpoint rows for each published six-vertex certificate have been checked by the exact product-table and adjacency evaluators. A complete kernel replay of the concrete model rows is still outstanding. The default build's unconditional CH theorem uses the five-vertex calculation. [Compiler and validation targets](solver/compile_six_vertex.py) · [Reproduction commands](README.md#reproduce)
+### 4.4 The one-third threshold at finite orders
+
+For a triangle-free oriented graph of order $n\ge1$ and minimum out-degree $d$, the lexicographic product gives $d\le c^*(n-1)$. If $c^*\le p/q$ with $q>0$, the integer comparison
+$$p n < q\left\lceil\frac{n}{3}\right\rceil+p$$
+therefore implies $d<\lceil n/3\rceil$. In a loopless digraph, minimum out-degree at least $n/3$ then forces a digon or a directed triangle. The following are the last orders satisfying this comparison in each residue class. For $n=3k$, $3k+1$, and $3k+2$, respectively, the comparison reduces to $(3p-q)k<p$, $(3p-q)k<q$, and $(3p-q)k<q-p$.
+
+| Input bound $p/q$ | $n\equiv0\pmod3$ | $n\equiv1\pmod3$ | $n\equiv2\pmod3$ | All orders through |
+| --- | ---: | ---: | ---: | ---: |
+| $3415403/10000000$, closed in Lean | 39 | 121 | 80 | 41 |
+| $33823/100000$, exact six-vertex computation | 69 | 205 | 137 | 71 |
+
+Lean proves the first row unconditionally. The second specialization takes $c^*\le33823/100000$ as a hypothesis, supplied mathematically by §4.3. The finite comparisons in both rows are kernel-checked. [Rounding lemma and specializations](lean/CaccettaHaggkvist/FiniteOrders.lean)
 
 ---
 
@@ -180,7 +201,7 @@ For an oriented graph $G$, write $a \to b$ for `G.adj a b` and $a \perp b$ for $
 3. **$P_3$ (`HasPattern3`, 5 five-graphs, 1 overlapping $P_2 \implies 4$ new)**: $u \to v, u \to v', u \to x, v \to w, v' \to w, v' \to x$ with $v \ne v', u \perp w, x \perp w, \neg(v \to x)$. (Every instance contains $\mathrm{OP}$ on $\{u, v', x, w\}$.)
 4. **$P_4$ (`HasPattern4`, `TC⁺`, 7 five-graphs)**: $u \to v \to w \to x, u \to x, x \to y$ with $u \perp w, v \perp x, v \ne y, \neg(v \to y \land w \to y), \neg(u \to y \land w \to y)$. (Every instance contains $\mathrm{TC}$ on $\{u, v, w, x\}$.)
 
-Together $P_1 \cup P_2 \cup P_3 \cup P_4$ comprises exactly **`16 / 317 = 5.05%`** of $\mathcal{F}_5$, and every single one of those 16 graphs contains at least one of $\{\mathrm{TC}, \mathrm{OP}, \mathrm{IP}\}$.
+Together $P_1 \cup P_2 \cup P_3 \cup P_4$ comprises exactly **`16 / 317 = 5.05%`** of $\mathcal{F}_5$, and every single one of those 16 graphs contains at least one of $\{\mathrm{TC}, \mathrm{OP}, \mathrm{IP}\}$. At order six, 1,467 representatives contain a pattern and 5,116 of 6,583 avoid all four. The counter evaluates the predicates on all five-tuples for each five-vertex representative, then looks up the six induced five-vertex subgraphs of each six-vertex representative. Each number counts isomorphism classes. [Finite counter](solver/count_critical_patterns.py)
 
 ### 5.2 Complete Proof of Theorem 3 (`exists_outDeg_le_third_of_forb_4patterns`)
 
@@ -241,4 +262,4 @@ With $c_{\rm CH}=3415403/10000000$, $t=199311/500000$ and $\delta=437/10000$, th
 
 ## 7. Lean axiom audit
 
-After building the default target, run `lake env lean Audit.lean` from `lean/`. The audit resolves the named public declarations and checks their transitive axiom dependencies against `propext`, `Classical.choice` and `Quot.sound`. Explicit hypotheses in a theorem's type are visible in the declaration. [Audit source](lean/Audit.lean)
+After building the default target, run `lake env lean Audit.lean` from `lean/`. The audit resolves 47 named public declarations and checks their transitive axiom dependencies against `propext`, `Classical.choice` and `Quot.sound`. Explicit hypotheses in a theorem's type are visible in the declaration. [Audit source](lean/Audit.lean)
