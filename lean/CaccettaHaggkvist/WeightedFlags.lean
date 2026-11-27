@@ -60,6 +60,25 @@ private theorem weight_append {W : Type*} {a b : ℕ} (w : W → ℝ)
     tupleWeight w (Fin.append x y) = tupleWeight w x * tupleWeight w y := by
   rw [← append_eq, tupleWeight_appendTuple]
 
+/-- First average the free vertices, then the fixed root tuple. -/
+theorem sum_eq_mean {W : Type*} [Fintype W] {k e : ℕ} (w : W → ℝ) (G : OrientedGraph W)
+    (A : OrientedGraph (Fin (k+e)) → ℝ) :
+    ∑ z, tupleWeight w z * A (G.pullback z) =
+      ∑ x : Fin k → W, tupleWeight w x * mean w G A x := by
+  rw [split_sum (a := k) (b := e)]
+  simp_rw [weight_append, mul_assoc, ← Finset.mul_sum]
+  rfl
+
+theorem mean_mul_root {W : Type*} [Fintype W] {k e : ℕ} (w : W → ℝ) (G : OrientedGraph W)
+    (R : OrientedGraph (Fin k) → ℝ) (A : OrientedGraph (Fin (k+e)) → ℝ) (x : Fin k → W) :
+    mean w G (fun K => R (K.pullback (Fin.castAdd e)) * A K) x =
+      R (G.pullback x) * mean w G A x := by
+  have hp (z : Fin e → W) : (G.pullback (Fin.append x z)).pullback (Fin.castAdd e) = G.pullback x := by
+    rw [OrientedGraph.pullback_comp]; congr 1; funext i; simp
+  unfold mean
+  rw [Finset.mul_sum]
+  exact Finset.sum_congr rfl (fun z _ => by dsimp only; rw [hp z]; ring)
+
 /-- Each coefficient of a weighted SOS block contributes the conditional
 localizer mean times a square. This also applies to tuples with repeated vertices. -/
 theorem expectation_eq {W : Type*} [Fintype W] {k d e : ℕ}

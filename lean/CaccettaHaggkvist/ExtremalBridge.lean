@@ -534,20 +534,20 @@ theorem css56_ineq_of_universal_sink {n k : ℕ} (hn : 0 < n)
     nlinarith [sq_nonneg r]
   · exact css56_ineq_of_commonOut_nonempty hn G₀ hG₀ hr hreg v h_ne
 
-/-- **Theorem C2 (`α_CSS = 83/100`, Conditional / Nonempty `U(v)` Branch)**:
+/-- **Theorem C2 (`α_CSS = 1037/1250`, Conditional / Nonempty `U(v)` Branch)**:
 Whenever `(commonOutSet G₀ v).Nonempty`, for ANY `r ≥ 0`,
-`(83/100) * (chiPairSet.card / n²) + 2 * r * (srcStarSet.card / n) + (r² - 2 * c₀ * r) ≥ 0`! -/
-theorem css83_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
+`(1037/1250) * (chiPairSet.card / n²) + 2 * r * (srcStarSet.card / n) + (r² - 2 * c₀ * r) ≥ 0`! -/
+theorem cssSharp_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
     (G₀ : OrientedGraph (Fin n)) [DecidableRel G₀.adj] (hG₀ : G₀.TriangleFree)
     {c₀ r : ℝ} (hr : 0 ≤ r)
     (hreg : ∀ w : Fin n, (G₀.toDigraph.outDeg w : ℝ) = c₀ * (n : ℝ))
     (v : Fin k → Fin n) (hU : (commonOutSet G₀ v).Nonempty) :
-    0 ≤ (83 / 100 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
+    0 ≤ (1037 / 1250 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
       2 * r * (((srcStarSet G₀ v).card : ℝ) / (n : ℝ)) + (r ^ 2 - 2 * c₀ * r) := by
   let U := commonOutSet G₀ v
   have _ : Nonempty {z : Fin n // z ∈ U} := Finset.Nonempty.to_subtype hU
   obtain ⟨w, hw_sq⟩ :=
-    (G₀.induce U).exists_hundred_outDeg_sq_le_83_ordNonEdges (G₀.triangleFree_induce hG₀ U)
+    (G₀.induce U).exists_outDeg_sq_le_1037_ordNonEdges (G₀.triangleFree_induce hG₀ U)
   let embU : ({z : Fin n // z ∈ U} × {z : Fin n // z ∈ U}) ↪ Fin n × Fin n :=
     ⟨fun p => (p.1.1, p.2.1), fun p₁ p₂ h => by
       rcases p₁ with ⟨⟨a₁, _⟩, ⟨b₁, _⟩⟩; rcases p₂ with ⟨⟨a₂, _⟩, ⟨b₂, _⟩⟩
@@ -580,12 +580,12 @@ theorem css83_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
     have h2 := Finset.card_sdiff_add_card_inter (G₀.toDigraph.outSet w.1) U
     rw [Finset.inter_comm, ← hd_U_eq] at h2
     omega
-  have hd_sq_chi : 100 * (d_U : ℝ) ^ 2 ≤ 83 * ((chiPairSet G₀ v).card : ℝ) := by
-    have hnat : 100 * (d_U * d_U) ≤ 83 * (chiPairSet G₀ v).card := by
-      have h1 : 100 * (d_U * d_U) ≤ 100 * (d_U * (d_U + 1)) :=
-        Nat.mul_le_mul_left 100 (Nat.mul_le_mul_left d_U (Nat.le_succ d_U))
-      exact le_trans h1 (le_trans hw_sq (Nat.mul_le_mul_left 83 hord_le_chi))
-    have hcast : ((100 * (d_U * d_U) : ℕ) : ℝ) ≤ ((83 * (chiPairSet G₀ v).card : ℕ) : ℝ) := by
+  have hd_sq_chi : 1250 * (d_U : ℝ) ^ 2 ≤ 1037 * ((chiPairSet G₀ v).card : ℝ) := by
+    have hnat : 1250 * (d_U * d_U) ≤ 1037 * (chiPairSet G₀ v).card := by
+      have h1 : 1250 * (d_U * d_U) ≤ 1250 * (d_U * (d_U + 1)) :=
+        Nat.mul_le_mul_left 1250 (Nat.mul_le_mul_left d_U (Nat.le_succ d_U))
+      exact le_trans h1 (le_trans hw_sq (Nat.mul_le_mul_left 1037 hord_le_chi))
+    have hcast : ((1250 * (d_U * d_U) : ℕ) : ℝ) ≤ ((1037 * (chiPairSet G₀ v).card : ℕ) : ℝ) := by
       exact_mod_cast hnat
     push_cast at hcast
     simpa [sq] using hcast
@@ -601,7 +601,7 @@ theorem css83_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
     calc c₀ - ((srcStarSet G₀ v).card : ℝ) / (n : ℝ)
         = (c₀ * (n : ℝ) - ((srcStarSet G₀ v).card : ℝ)) / (n : ℝ) := by field_simp [hn_pos.ne']
       _ ≤ (d_U : ℝ) / (n : ℝ) := div_le_div_of_nonneg_right (by linarith) hn_pos.le
-  have hchi_ge_sq : ((d_U : ℝ) / (n : ℝ)) ^ 2 ≤ (83 / 100 : ℝ) * chi_val := by
+  have hchi_ge_sq : ((d_U : ℝ) / (n : ℝ)) ^ 2 ≤ (1037 / 1250 : ℝ) * chi_val := by
     dsimp [chi_val]
     rw [div_pow]
     have hdiv := div_le_div_of_nonneg_right hd_sq_chi (sq_nonneg (n : ℝ))
@@ -611,19 +611,19 @@ theorem css83_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
   by_cases hcs : c₀ - s_val ≤ 0
   · nlinarith [sq_nonneg r]
   · push Not at hcs
-    have hsq_le : (c₀ - s_val) ^ 2 ≤ (83 / 100 : ℝ) * chi_val :=
+    have hsq_le : (c₀ - s_val) ^ 2 ≤ (1037 / 1250 : ℝ) * chi_val :=
       le_trans (pow_le_pow_left₀ hcs.le hc₀_sub 2) hchi_ge_sq
     have hsq_r : 0 ≤ ((c₀ - s_val) - r) ^ 2 := sq_nonneg _
     nlinarith
 
-/-- **Theorem C2 (`α_CSS = 83/100`, Universal Sink Unconditional Branch)**: -/
-theorem css83_ineq_of_universal_sink {n k : ℕ} (hn : 0 < n)
+/-- **Theorem C2 (`α_CSS = 1037/1250`, Universal Sink Unconditional Branch)**: -/
+theorem cssSharp_ineq_of_universal_sink {n k : ℕ} (hn : 0 < n)
     (G₀ : OrientedGraph (Fin n)) [DecidableRel G₀.adj] (hG₀ : G₀.TriangleFree)
     {c₀ r : ℝ} (hr : 0 ≤ r)
     (hreg : ∀ w : Fin n, (G₀.toDigraph.outDeg w : ℝ) = c₀ * (n : ℝ))
     (v : Fin k → Fin n) (r_sink : Fin k)
     (hsink : ∀ i : Fin k, i ≠ r_sink → G₀.adj (v i) (v r_sink)) :
-    0 ≤ (83 / 100 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
+    0 ≤ (1037 / 1250 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
       2 * r * (((srcStarSet G₀ v).card : ℝ) / (n : ℝ)) + (r ^ 2 - 2 * c₀ * r) := by
   rcases (commonOutSet G₀ v).eq_empty_or_nonempty with h_emp | h_ne
   · have hsub : G₀.toDigraph.outSet (v r_sink) ⊆ srcStarSet G₀ v := by
@@ -644,7 +644,30 @@ theorem css83_ineq_of_universal_sink {n k : ℕ} (hn : 0 < n)
     have hchi_nn : 0 ≤ ((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2) :=
       div_nonneg (Nat.cast_nonneg _) (sq_nonneg _)
     nlinarith [sq_nonneg r]
-  · exact css83_ineq_of_commonOut_nonempty hn G₀ hG₀ hr hreg v h_ne
+  · exact cssSharp_ineq_of_commonOut_nonempty hn G₀ hG₀ hr hreg v h_ne
+
+theorem css83_ineq_of_commonOut_nonempty {n k : ℕ} (hn : 0 < n)
+    (G₀ : OrientedGraph (Fin n)) [DecidableRel G₀.adj] (hG₀ : G₀.TriangleFree)
+    {c₀ r : ℝ} (hr : 0 ≤ r)
+    (hreg : ∀ w : Fin n, (G₀.toDigraph.outDeg w : ℝ) = c₀ * (n : ℝ))
+    (v : Fin k → Fin n) (hU : (commonOutSet G₀ v).Nonempty) :
+    0 ≤ (83 / 100 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
+      2 * r * (((srcStarSet G₀ v).card : ℝ) / (n : ℝ)) + (r ^ 2 - 2 * c₀ * r) := by
+  have hs := cssSharp_ineq_of_commonOut_nonempty hn G₀ hG₀ hr hreg v hU
+  have hχ := div_nonneg (Nat.cast_nonneg ((chiPairSet G₀ v).card) : (0 : ℝ) ≤ _) (sq_nonneg (n : ℝ))
+  linarith
+
+theorem css83_ineq_of_universal_sink {n k : ℕ} (hn : 0 < n)
+    (G₀ : OrientedGraph (Fin n)) [DecidableRel G₀.adj] (hG₀ : G₀.TriangleFree)
+    {c₀ r : ℝ} (hr : 0 ≤ r)
+    (hreg : ∀ w : Fin n, (G₀.toDigraph.outDeg w : ℝ) = c₀ * (n : ℝ))
+    (v : Fin k → Fin n) (r_sink : Fin k)
+    (hsink : ∀ i : Fin k, i ≠ r_sink → G₀.adj (v i) (v r_sink)) :
+    0 ≤ (83 / 100 : ℝ) * (((chiPairSet G₀ v).card : ℝ) / ((n : ℝ) ^ 2)) +
+      2 * r * (((srcStarSet G₀ v).card : ℝ) / (n : ℝ)) + (r ^ 2 - 2 * c₀ * r) := by
+  have hs := cssSharp_ineq_of_universal_sink hn G₀ hG₀ hr hreg v r_sink hsink
+  have hχ := div_nonneg (Nat.cast_nonneg ((chiPairSet G₀ v).card) : (0 : ℝ) ≤ _) (sq_nonneg (n : ℝ))
+  linarith
 
 /-! ## Section 4: Section 5 Two-Endpoint Affine Interval Closure (`[c_low, c_high]`) -/
 

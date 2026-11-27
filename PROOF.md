@@ -1,20 +1,18 @@
 # Directed triangle bounds and certificate soundness
 
-The default Lean build proves the five-vertex bound, the CSS and forbidden-pattern theorems, and a rainbow consequence. The six-vertex result uses an additional exact integer computation. The correspondence between that computation and the Lean graph functional is still an open formalization step.
+The default Lean build proves a five-vertex CH bound, a feedback-arc bound, a packing theorem for the four critical patterns, and a rainbow consequence. The six-vertex result combines the extremal argument with two independent exact computations of the model rows. The Lean program checker derives the expectation inequality from the certificate instructions and reduces the concrete CH theorem to finite kernel checks.
 
 ## 1. Statements of Main Theorems
 
 Let $G = (V, E)$ be a finite simple directed graph (`Digraph V`, irreflexive: $\neg (v \to v)$). Say $G$ is **3-free** (`¬ G.HasCycleLe3`) if it contains neither a digon ($u \to v \to u$) nor a directed triangle ($u \to v \to w \to u$); equivalently, $G$ is a **$\vec{C}_3$-free oriented graph** (`OrientedGraph V` with `G.TriangleFree`). Write $d^+(v) = |N^+(v)|$, $\delta^+(G) = \min_{v \in V} d^+(v)$, $\gamma(G)$ for the number of unordered non-adjacent pairs $\{u, v\} \subseteq V$ (so `G.ordNonEdges` $= 2\gamma(G)$), and $\beta(G)$ for the minimum size of a feedback arc set $F \subseteq E$ such that $G \setminus F$ is acyclic.
 
-1. **Unconditional CH bound in Lean.** For every finite nonempty directed-triangle-free oriented graph $G$ on $n$ vertices,
-   $$\delta^+(G)<(427/1250)n.$$
-   The base certificate at $689/2000$ and the interval certificate down to $427/1250$ both have closed Lean theorems. Section 4 gives the additional six-vertex calculation at $3383/10000$. [Five-vertex interval theorem](lean/CaccettaHaggkvist/CertM5_427_1250.lean)
+1. **Directed cycles.** For a nonempty triangle-free oriented graph on $n$ vertices the default Lean build proves $\delta^+(G)<(3415403/10000000)n$. The same five-vertex coefficients that prove the interval starting at $427/1250$ have strictly negative slack at this smaller rational. Section 4 gives the six-vertex computer-assisted bound $c^*\le491353450461462518/1452728700789264675$. A loopless digraph at or above this ratio contains a digon or directed triangle. [Five-vertex theorem](lean/CaccettaHaggkvist/CertM5Refined.lean) · [Finite consequence of a supremum bound](lean/CaccettaHaggkvist/Lexicographic.lean)
 
-2. **Feedback arc sets.** Every finite 3-free digraph admits a feedback arc set of size $\beta(G)\le (83/100)\gamma(G)$. For nonempty graphs the degree corollary gives $100\delta^+(G)(\delta^+(G)+1)\le166\gamma(G)$. [CSS theorem and corollaries](lean/CaccettaHaggkvist/CSS83.lean)
+2. **Feedback arc sets.** Every finite 3-free digraph admits a feedback arc set of size at most $(1037/1250)\gamma(G)$. For nonempty graphs of minimum out-degree $d$, the degree corollary is $1250d(d+1)\le2074\gamma(G)$. [CSS theorem and degree corollaries](lean/CaccettaHaggkvist/CSS83.lean)
 
-3. **Forbidden patterns.** A finite nonempty directed-triangle-free oriented graph avoiding $P_1,P_2,P_3,P_4$ has a vertex $v$ with $3d^+(v)\le n-1$. Each obstruction in Section 5 violates a specified intermediate critical-arc claim when one prohibition is removed. [Four-pattern theorem](lean/CaccettaHaggkvist/RazborovSharp.lean)
+3. **Forbidden patterns.** Avoiding $P_1,P_2,P_3,P_4$ forces $3\delta^+(G)\le n-1$. In general $G$ contains a family of $k$ vertex-disjoint supports of these patterns with $3\delta^+(G)+1\le n+10k$. [Four-pattern theorem](lean/CaccettaHaggkvist/RazborovSharp.lean) · [Packing theorem](lean/CaccettaHaggkvist/PatternPacking.lean)
 
-4. **Rainbow triangles.** At least $n$ color classes of size at least $(12457/31250)n$ in a simple edge-colored graph on $n\ge1$ vertices force a rainbow triangle. This follows in Lean from the five-vertex CH bound. The specialization at $79697/200000$ takes the stronger CH bound at $3383/10000$ as an explicit argument. [Unconditional corollary](lean/CaccettaHaggkvist/RainbowBounds.lean) · [Parameterized reduction](lean/CaccettaHaggkvist/RainbowTriangle.lean)
+4. **Rainbow triangles.** At least $n$ color classes of size at least $(199311/500000)n$ in a simple edge-colored graph on $n\ge1$ vertices force a rainbow triangle. The six-vertex CH bound at $33823/100000$ yields the smaller coefficient $4981/12500$. The latter Lean specialization takes the CH inequality as an argument. [Rainbow corollaries](lean/CaccettaHaggkvist/RainbowBounds.lean)
 
 ---
 
@@ -77,33 +75,33 @@ Fix a finite simple $\vec{C}_3$-free oriented graph $H = (V, E)$ and $v \in V$. 
 > $$q_A(w) \ge k_u - k_w \qquad\text{and}\qquad q_B(u) \ge l_w - l_u.$$
 > *Proof.* For any $a \in K(u)$ ($a \to u$), $w \to a$ is forbidden (else $a \to u \to w \to a$ is $\vec{C}_3$), so $K(u) \subseteq K(w) \cup \{a \in A : a \perp w\}$, giving $k_u \le k_w + q_A(w)$. Symmetrically, for any $b \in L(w)$ ($w \to b$), $b \to u$ is forbidden (else $u \to w \to b \to u$ is $\vec{C}_3$), so $L(w) \subseteq L(u) \cup \{b \in B : b \perp u\}$, giving $l_w \le l_u + q_B(u)$. $\blacksquare$
 
-### 3.2 Proof of $100\,\beta(H) \le 83\,\gamma(H)$ (`exists_feedback_200_card_le_83_ordNonEdges`)
+### 3.2 A feedback set of size at most $(1037/1250)\gamma(H)$
 
-Proceed by strong induction on $|V|$ ($|V| \le 1$ is trivial). For any $v \in V$ and partition $C(v) = C_A \sqcup C_B$, deleting $v$ and splitting into $H_1 = H[A \cup C_A]$ and $H_2 = H[B \cup C_B]$ loses all arcs from $H_1$ to $H_2$ — count $\tau(C_A, C_B) = e(A, C_B) + e(C_A, B) + e(C_A, C_B)$ — while saving all cross non-edges $\rho(C_A, C_B) = |C| + \bar{e}(A, B) + \bar{e}(A, C_B) + \bar{e}(B, C_A) + \bar{e}(C_A, C_B)$. Assume for contradiction that for every $v \in V$ and every partition $C(v) = C_A \sqcup C_B$,
-$$\rho(C_A, C_B) < \frac{100}{83}\,\tau(C_A, C_B). \tag{*}$$
+Induct on $|V|$. For a vertex $v$ and a partition $C=C_A\sqcup C_B$, order $B\cup C_B$, $v$, and $A\cup C_A$ in this order, using an inductive ranking on the two outer parts. Removing the backward arcs between the parts costs $\tau=e(A,C_B)+e(C_A,B)+e(C_A,C_B)$. The saved nonedges are $\rho=|C|+\bar e(A,B)+\bar e(A,C_B)+\bar e(B,C_A)+\bar e(C_A,C_B)$. A partition with $u\tau\le\rho$, where $u=1250/1037=1+\mu$, completes the induction. Suppose every partition at every vertex satisfies $\rho<u\tau$.
 
-1. **Step 1 (Convex Step-1 Mixing, $\theta = \frac{17}{20}$)**: Let $c_v = |C(v)|$, $g_v = \bar{e}(A(v), B(v))$, $t_v = |E(H[C(v)])|$. Using the exact global triple-counting identities $\sum_v e(A, C) = \sum_v e(C, B) = \sum_v g_v$ and $\sum_v (\bar{e}(A, C) + \bar{e}(B, C)) = 2 \sum_v t_v$:
-   - Averaging $(*)$ uniformly over all $2^{c_v}$ partitions of $C(v)$ and summing over $v \in V$ gives $\sum_v \left(c_v + \frac{c_v(c_v - 1)}{4} + \frac{33}{166} t_v - \frac{17}{83} g_v\right) < 0$.
-   - Averaging $(*)$ over the two trivial partitions $(\emptyset, C)$ and $(C, \emptyset)$ gives $\sum_v \left(c_v + t_v - \frac{17}{83} g_v\right) < 0$.
-   - Taking $\frac{17}{20} \cdot (\text{Uniform}) + \frac{3}{20} \cdot (\text{Trivial})$ and dropping $\frac{63}{80} c_v \ge 0$ yields a vertex $v \in V$ with $c := c_v \ge 1$ satisfying:
-     $$g := \frac{g_v}{c^2} > \frac{83}{80} + \frac{1059}{680}\,t, \qquad t := \frac{t_v}{c^2}. \tag{1}$$
+1. Give the uniform random cut weight $\theta=57/67$ and the equal mixture of the two trivial cuts weight $1-\theta$. Write $c_v=|C(v)|$, $g_v=\bar e(A(v),B(v))$ and $t_v=|E(H[C(v)])|$. The triple counts $\sum_v e(A,C)=\sum_v e(C,B)=\sum_v g_v$ and $\sum_v(\bar e(A,C)+\bar e(B,C))=2\sum_v t_v$ yield a vertex with $c=c_v>0$ and
+   $$g:=g_v/c^2>C_0+C_t t,\qquad t:=t_v/c^2,\quad C_0=\frac{\theta}{4\mu}=\frac{19703}{19028},\quad C_t=\frac{4-3\theta-\theta\mu}{4\mu}=\frac{22112}{14271}. \tag{1}$$
 2. **Step 2 ($\lambda = \frac{3}{2}$ Threshold Partition & Branch-Free $\vec{C}_3$-Exclusion)**: Set $m_u = \min(k_u, l_u)$, $s_u = \max(k_u, l_u)$ (note $c\,g_v \ge \sum_{u \in C} m_u s_u$ by counting $a \perp b$ over $a \in K(u), b \in L(u)$ — since $a \to u \to b$ forces $a \perp b$!). Partition $C = U \sqcup W$ with $U = \{u \in C : 2 s_u \le 3 m_u\}$, $W = \{w \in C : 2 s_w > 3 m_w\}$, and split $W = W_A \sqcup W_B$ greedily ($W_A = \{k_w \ge l_w\}$, $W_B = \{l_w > k_w\}$). Define $a = |U|/c$, $x = \frac{1}{c^2}(\sum_{u \in U} \frac{k_u + l_u}{2} + \sum_{w \in W} m_w)$, $q_W = (\bar{e}(B, W_A) + \bar{e}(A, W_B))/c^2$, $t_1 = |E(H[U])|/c^2$, $t_2 = (e(U, W) + e(W, U))/c^2 \le a(1-a)$, $t_3 = |E(H[W])|/c^2$, and $m_3 = e(W_A, W_B)/c^2 \le t_3$.
    For every backward arc $w_1 \to w_2$ ($w_1 \in W_A, w_2 \in W_B$), the $\vec{C}_3$-Exclusion Non-Edge Lemma gives
    $$q_B(w_1) + q_A(w_2) \ge (k_{w_1} - l_{w_1}) + (l_{w_2} - k_{w_2}) = (s_{w_1} - m_{w_1}) + (s_{w_2} - m_{w_2}).$$
    Setting $\alpha_w := d^+(w, W_B)/c \in [0, 1]$ for $w \in W_A$ and $d^-(w, W_A)/c \in [0, 1]$ for $w \in W_B$ (so $\frac{1}{c}\sum_{w \in W} \alpha_w = 2 m_3$), summing over all arcs $W_A \to W_B$ and using $|W_A|, |W_B| \le c$ (completely branch-free, zero division by $|W_A|$ or $|W_B|$!) gives
    $$q_W \ge \frac{1}{c}\sum_{w \in W} \alpha_w\,\frac{s_w - m_w}{c}. \tag{2}$$
-3. **Step 3 (Per-Vertex Rational Perfect Squares — Zero $\sqrt{\cdot}$)**: With $\beta_g = \frac{12}{25}$,
-   - On $u \in U$ ($y_u = \frac{m_u + s_u}{2c}$, $2s_u \le 3m_u \implies \frac{m_u s_u}{c^2} \ge \frac{24}{25} y_u^2$): $\frac{288}{625}(y_u - \frac{15625}{11952})^2 \ge 0$ gives $\frac{100}{83} y_u \le \frac{12}{25}\frac{m_u s_u}{c^2} + \frac{197}{250}$.
-   - On $w \in W$ ($z_w = \frac{m_w}{c}$, $\frac{m_w s_w}{c^2} \ge \frac{3}{2} z_w^2$, $\frac{s_w - m_w}{c} \ge \frac{1}{2} z_w$): perfect squares at $\alpha = 0$ and $\alpha = 1$ convexly combined by $\alpha_w \in [0, 1]$ yield $\frac{12}{25}\frac{m_w s_w}{c^2} - \frac{100}{83} z_w + \alpha_w \frac{s_w - m_w}{c} \ge -\frac{101}{200} + \frac{33}{100}\alpha_w$.
-   - Summing over $C$ and applying $c\,g_v \ge \sum m_u s_u$ and (2) gives:
-     $$g - \frac{100}{83}\,x + q_W \ge \frac{13}{25}\,g - \frac{197}{250}\,a - \frac{101}{200}(1 - a) + \frac{33}{50}\,m_3. \tag{3}$$
-4. **Step 4 (Cut 3 ONLY — Strictly Positive-Definite Quadratic Contradiction)**: Applying **Cut 3** (uniform $\frac{1}{2}$-$\frac{1}{2}$ on $U$, greedy $W_A \subseteq C_A, W_B \subseteq C_B$ on $W$) while retaining $q_W$ gives
-   $$g - \frac{100}{83}\,x + q_W < \frac{133}{166}\,t_1 + \frac{183}{166}\,t_2 + \frac{100}{83}\,m_3 - \frac{a^2}{4} - \frac{a(1-a)}{2}.$$
-   Substituting (3) and (1) eliminates $t_1, t_3, m_3$ with nonnegative slacks ($+\frac{12161}{1411000}t_1 \ge 0$, $+\frac{13767}{17000}(t_3 - m_3) + \frac{373921}{1411000}m_3 \ge 0$) and bounds $t_2 \le a(1-a)$, collapsing directly to:
-   $$0 > \frac{60089}{1411000}\,a^2 - \frac{26663}{352750}\,a + \frac{69}{2000} \ge \frac{162880399}{169571158000} > 0 \qquad (\forall\,a \in \mathbb{R}),$$
-   a contradiction! $\blacksquare$
+3. Set $b=14/29$, $C_U=2128/2715$ and $C_W=1387/2765$. The threshold $2s\le3m$ on $U$ gives $ms/c^2\ge(24/25)((m+s)/(2c))^2$, hence $u(m+s)/(2c)\le bms/c^2+C_U$ by completing the square. On $W$, $ms/c^2\ge3(m/c)^2/2$ and $(s-m)/c\ge m/(2c)$. Completing the square with zero penalty gives $um/c\le bms/c^2+C_W$. With full penalty it gives $um/c-(s-m)/c\le bms/c^2+2783/11060$. The two constants differ by $1/4$. Interpolate using $\alpha_w$, sum and apply (2) to obtain
+   $$g-u x+q_W\ge(1-b)g-C_Ua-C_W(1-a)+m_3/2. \tag{3}$$
+
+4. Assign the vertices of $U$ independently to the two sides with probability $1/2$, and assign $W_A,W_B$ to their respective sides. The bad-cut assumption gives
+   $$g-u x+q_W<x_1t_1+x_2t_2+u m_3-a^2/4-a(1-a)/2,$$
+   where $x_1=831/1037$ and $x_2=2287/2074$. Set $h=(1-b)C_t$ and $z=h-x_2$. Since $h\ge x_1$, $h+1/2\ge u$, $t_3\ge m_3$, $z<0$ and $t_2\le a(1-a)$, substituting (1) and (3) implies $F(a)<0$ for
+   $$F(a)=(1-b)C_0-C_Ua-C_W(1-a)+a^2/4+(1/2+z)a(1-a).$$
+   The minimum over all real $a$ is $645631807998199753332929/37841972581333934457207038100>0$, attained at $35840809478596/44046246448995$. This contradiction supplies the required partition. [Exact inequalities and inductive construction](lean/CaccettaHaggkvist/CSS83.lean)
 
 ---
+
+The rational cut calculation can be reproduced independently. The command below uses the three caps from the Lean proof. Omitting them uses the exact maxima of the three completed squares. The checker reports the tangency point, polynomial minimum and the two coefficient slacks needed to eliminate the edge counts. [Rational parameter checker](solver/css_cut_parameters.py)
+
+```sh
+python3 solver/css_cut_parameters.py 1037/1250 --caps 2128/2715 1387/2765 2783/11060
+```
 
 ## 4. Exact six-vertex certificates
 
@@ -129,10 +127,15 @@ The independent checker constructs $Q=\sum_j w_j u_j u_j^\top$ with integer vect
 | [Five vertices, 427/1250 to 689/2000](certs/cert_m5_tier1_linonly_427_1250_to_689_2000.json) | 317 | $-41890781053/72477573120000000$ | $-4630502621/7247757312000000$ |
 | [Six vertices, 3383/10000 to 427/1250](certs/cert_m6_css83_sos_3383_10000_to_427_1250.json) | 6,583 | $-2057781171829/197912092999680000000$ | $-2035000603313/148434069749760000000$ |
 | [Six vertices, 677/2000 to 427/1250](certs/cert_m6_css83_nosos_677_2000_to_427_1250.json) | 6,583 | $-523081657313/39582418599936000000$ | $-941320844407/37108517437440000000$ |
+| [Five vertices, refined lower endpoint](lean/CaccettaHaggkvist/CertM5Refined.lean) | 317 | $-203787251/644245094400000000$ | $-4630502621/7247757312000000$ |
+| [Six vertices, 33827/100000 to 427/1250](certs/cert_m6_css83_33827_100000_to_427_1250.json) | 6,583 | $-2252090076367907/436396165064294400000000$ | $-104429035221893/12468461858979840000000$ |
+| [Six vertices, 33823/100000 to 33827/100000](certs/cert_m6_css1037_33823_100000_to_33827_100000.json) | 6,583 | $-93885997554071377/27929354564114841600000000$ | $-69887210502699631/18619569709409894400000000$ |
 
-### 4.3 What the six-vertex Lean theorem requires
+### 4.3 The affine score and its Lean program
 
 The direct evaluator checks each one-vertex extension witness. It then reads the flag identifiers and block order, skips the stored product counts, and evaluates the graph functions from adjacency on every permutation of each representative. Averaging over these permutations gives the table in §4.2. [Direct evaluator](solver/verify_six_vertex.py)
+
+Across the 6,583 representatives there are 4,169,935 distinct ordered adjacency codes. Weighting each code by its multiplicity recovers all 4,739,760 orderings. Certificates evaluated together share the adjacency projections. On the same server, one timed invocation for the original pair of six-vertex certificates took 45.17 seconds before these changes and 11.88 seconds after them. Peak resident memory rose from 52,444 to 97,924 KiB. All 13,166 integer intercept/slope pairs for those two certificates agreed with the independently generated product tables.
 
 For a fixed ordering, write $c$ for the candidate out-degree ratio. The evaluator sums the following four contributions and divides by the common positive coefficient scale `q_denom`.
 
@@ -153,9 +156,15 @@ B=\max_H |v_H|=\frac{8331737176489}{1099511627776000},\qquad
 \varepsilon=\frac{2057781171829}{508663414095386040000}.
 $$
 
-With these values the two bounds in §2.4 contradict each other for $c^*\ge3383/10000$. This gives the computer-assisted bound $\delta^+(G)<(3383/10000)n$ for nonempty directed-triangle-free oriented graphs, using the externally evaluated rational inequalities. For a general loopless digraph the same degree condition forces a directed cycle of length two or three.
+For the last certificate the evaluator gives $M=46194347230127/140737488355328$ and $B=941512289966121/157625986957967360$. Its lower endpoint has slack below $-3.36\times10^{-9}$. The two consecutive intervals in §4.2 therefore give $c^*\le33823/100000$. This uses the strengthened CSS coefficient $1037/1250$ in the second interval.
 
-`WeightedFlag.expectation_eq` and `WeightedFlag.expectation_ge` formalize the conditional-mean identity and loss estimate for one localized square. The remaining concrete Lean instance of `hasCycleLe3_of_six_vertex_certificate` must encode the coefficients in $U,V$, assemble the expectation proof `hmean`, and prove the endpoint inequalities `hends` for those same functions. The bridge supplies the five-vertex upper endpoint, relabeling argument, uniform margin, and slope bound. [Weighted-square lemmas](lean/CaccettaHaggkvist/WeightedFlags.lean) · [Six-vertex bridge](lean/CaccettaHaggkvist/IntervalM6Bridge.lean)
+For a row $u_H+c v_H$ with $v_H<0$, the leftmost allowed point is $-u_H/v_H$. Rows with nonnegative slope remain strictly negative to the left of the verified upper endpoint. Maximizing the roots over the negative-slope rows of the last certificate gives
+$$L=491353450461462518/1452728700789264675.$$
+Representative 40 (zero-based) has zero slack at $L$. Every row is nonpositive there and strictly negative at $33827/100000$. If $c^*>L$, then $(L+c^*)/2$ is an interior point with a strictly negative maximum. Applying §2.4 from that midpoint to the known upper endpoint gives a contradiction. Thus $c^*\le L$. Applying the lexicographic product of $G$ with a sequence of near extremizers also gives $\delta^+(G)\le c^*(n-1)$, which yields a strict finite ratio at $L>0$. [Interval closure](lean/CaccettaHaggkvist/IntervalM6Bridge.lean) · [Lexicographic product proof](lean/CaccettaHaggkvist/Lexicographic.lean)
+
+The compiler encodes the degree, linear and Gram terms in a typed program with integer intercept and slope. The degree term in Lean uses the second vertex for the tested arc and the other four free vertices for its flag, a fixed permutation of the order used above. A factorization check validates every Gram entry. Conditional independence and the pointwise localizer inequalities then yield the full expectation estimate via `SixVertex.Program.expectation_ge`. The reflected permutation sum is proved equal to the symmetrized graph score. Given all finite endpoint checks, `SixVertex.cStar_le_of_program` closes the CH bound for any such program. [Gram checks](lean/CaccettaHaggkvist/GramPacking.lean) · [Localizer inequalities](lean/CaccettaHaggkvist/FlagLocalizers.lean) · [Program semantics](lean/CaccettaHaggkvist/SixVertexProgram.lean) · [Reflection](lean/CaccettaHaggkvist/SixVertexReflection.lean)
+
+All 35 Gram blocks of the $0.3385$ program and all 42 of the $0.3383$ program have been checked by the Lean kernel. The 6,583 endpoint rows for each published six-vertex certificate have been checked by the exact product-table and adjacency evaluators. A complete kernel replay of the concrete model rows is still outstanding. The default build's unconditional CH theorem uses the five-vertex calculation. [Compiler and validation targets](solver/compile_six_vertex.py) · [Reproduction commands](README.md#reproduce)
 
 ---
 
@@ -200,6 +209,10 @@ Each example avoids the other three patterns and violates the indicated step of 
 
 ---
 
+### 5.4 Disjoint obstructions above the one-third bound
+
+Write $d=\delta^+(G)$. If a vertex set $T$ meets every occurrence of the four patterns, then a nonempty $G-T$ has minimum out-degree at least $d-|T|$ and at most $(n-|T|-1)/3$. Thus $3d+1\le n+2|T|$. When $T=V$, the same inequality follows from $d\le n-1$. Take a maximum family of $k$ vertex-disjoint supports of the four patterns, each of size at most five. Their union meets every occurrence, so $3d+1\le n+10k$. [Deletion and packing theorems](lean/CaccettaHaggkvist/PatternPacking.lean)
+
 ## 6. Rainbow triangles from a directed-triangle bound
 
 The Lean reduction takes an out-degree bound as an explicit parameter. [RainbowTriangle.lean](lean/CaccettaHaggkvist/RainbowTriangle.lean)
@@ -224,7 +237,7 @@ Let $G$ be a rainbow-triangle-free edge-colored graph on $n \ge 1$ vertices with
 - **Step 2A (Shared Center, `rainbow_case_shared_center`)**: Two distinct concentrated colors sharing a center $v$ have disjoint neighborhoods $S_1, S_2$ whose cross-edges can only use edges of $E_{c_1} \cup E_{c_2}$ not incident to $v$ (else rainbow triangle!), forcing too many non-edges of $E$ when $\frac{1}{2} - (1 - \varepsilon)^2 t^2 < t$.
 - **Step 2B (Injective Centers, `rainbow_case_inj_center`)**: Distinct centers form a set $T \subseteq V$ of size $|T| > (1 - \delta) n$. Orienting $u \to w$ in $T$ whenever $u w \in E_{c(u)}$ defines a **$\vec{C}_3$-free oriented graph $D$ on $T$** (a digon would assign two colors to the same edge, and a directed triangle would give a rainbow triangle) with $\delta^+(D) \ge \frac{929}{1000} t n - (n - |T|) \ge c_{\mathrm{CH}} |T|$ whenever $c_{\mathrm{CH}}(1 - \delta) \le \frac{929}{1000} t - \delta$, contradicting the CH upper bound!
 
-Using $c_{\rm CH}=427/1250$, $t=12457/31250$ and $\delta=2181/50000$, all three parameter inequalities hold by exact rational arithmetic. The five-vertex theorem supplies the CH hypothesis. Using $c_{\rm CH}=3383/10000$ gives $t=79697/200000$ with $\delta=4817/100000$ under the corresponding CH hypothesis. [Unconditional specialization](lean/CaccettaHaggkvist/RainbowBounds.lean) · [Six-vertex conditional specialization](lean/CaccettaHaggkvist/RainbowTriangle.lean)
+With $c_{\rm CH}=3415403/10000000$, $t=199311/500000$ and $\delta=437/10000$, the three parameter inequalities hold by exact rational arithmetic. The five-vertex theorem supplies the CH hypothesis. With $c_{\rm CH}=33823/100000$, the parameters are $t=4981/12500$ and $\delta=241/5000$. [Rainbow specializations](lean/CaccettaHaggkvist/RainbowBounds.lean)
 
 ## 7. Lean axiom audit
 

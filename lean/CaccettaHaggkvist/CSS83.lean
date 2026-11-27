@@ -6,11 +6,12 @@ public import CaccettaHaggkvist.CSS
 public import CaccettaHaggkvist.CSS56
 
 /-!
-# Feedback arc sets with coefficient `83/100`
+# Feedback arc sets with coefficient `1037/1250`
 
-For a finite loopless digraph with no directed cycle of length two or three,
-200 times the size of the feedback set is at most 83 times the number of ordered nonedges. Each unordered nonedge contributes two ordered nonedges.
-The construction also gives an injective topological ranking after the feedback arcs are removed.
+The balanced/unbalanced threshold is `3/2`, the uniform-cut mixing weight is
+`57/67`, and the quadratic weight is `14/29`. For every finite 3-free oriented
+graph, 2500 times the size of a feedback arc set is at most 1037 times the
+number of ordered nonedges. The previous `83/100` interfaces follow by weakening.
 -/
 
 @[expose] public section
@@ -23,9 +24,9 @@ universe u
 
 /-! ## Section 1: Pure Real Algebraic Lemmas (Zero `√`, Tiny Denominators) -/
 
-private lemma step3_u_algebra_83 {m s c : ℝ} (hc : 0 < c) (_hm : 0 ≤ m)
+private lemma cut_bound_balanced {m s c : ℝ} (hc : 0 < c) (_hm : 0 ≤ m)
     (hms : m ≤ s) (h32 : 2 * s ≤ 3 * m) :
-    (100 / 83 : ℝ) * ((m + s) / (2 * c)) ≤ (12 / 25 : ℝ) * (m * s / (c ^ 2)) + 197 / 250 := by
+    (1250 / 1037 : ℝ) * ((m + s) / (2 * c)) ≤ (14 / 29 : ℝ) * (m * s / (c ^ 2)) + 2128 / 2715 := by
   let y : ℝ := (m + s) / (2 * c)
   have hprod : 0 ≤ (3 * m - 2 * s) * (3 * s - 2 * m) :=
     mul_nonneg (by linarith) (by linarith)
@@ -38,12 +39,12 @@ private lemma step3_u_algebra_83 {m s c : ℝ} (hc : 0 < c) (_hm : 0 ≤ m)
         = (6 * (m + s) ^ 2) / (c ^ 2) := by ring
       _ ≤ (25 * (m * s)) / (c ^ 2) := div_le_div_of_nonneg_right h24 hc2.le
       _ = 25 * (m * s / (c ^ 2)) := by ring
-  have hsq : 0 ≤ (11952 * y - 15625) ^ 2 := sq_nonneg _
+  have hsq : 0 ≤ (348432 * y - 453125) ^ 2 := sq_nonneg _
   dsimp [y] at hy_sq hsq
   linarith
 
-private lemma step3_w0_algebra_83 {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32 : 3 * m ≤ 2 * s) :
-    (100 / 83 : ℝ) * (m / c) ≤ (12 / 25 : ℝ) * (m * s / (c ^ 2)) + 101 / 200 := by
+private lemma cut_bound_unbalanced {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32 : 3 * m ≤ 2 * s) :
+    (1250 / 1037 : ℝ) * (m / c) ≤ (14 / 29 : ℝ) * (m * s / (c ^ 2)) + 1387 / 2765 := by
   let z : ℝ := m / c
   have hms : 3 * m ^ 2 ≤ 2 * (m * s) := by nlinarith
   have hz_sq : 3 * z ^ 2 ≤ 2 * (m * s / (c ^ 2)) := by
@@ -53,12 +54,12 @@ private lemma step3_w0_algebra_83 {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32
     calc 3 * (m ^ 2 / c ^ 2) = (3 * m ^ 2) / (c ^ 2) := by ring
       _ ≤ (2 * (m * s)) / (c ^ 2) := div_le_div_of_nonneg_right hms hc2.le
       _ = 2 * (m * s / (c ^ 2)) := by ring
-  have hsq : 0 ≤ (747 * z - 625) ^ 2 := sq_nonneg _
+  have hsq : 0 ≤ (21777 * z - 18125) ^ 2 := sq_nonneg _
   dsimp [z] at hz_sq hsq
   linarith
 
-private lemma step3_w1_algebra_83 {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32 : 3 * m ≤ 2 * s) :
-    (100 / 83 : ℝ) * (m / c) - (s - m) / c ≤ (12 / 25 : ℝ) * (m * s / (c ^ 2)) + 7 / 40 := by
+private lemma cut_bound_penalized {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32 : 3 * m ≤ 2 * s) :
+    (1250 / 1037 : ℝ) * (m / c) - (s - m) / c ≤ (14 / 29 : ℝ) * (m * s / (c ^ 2)) + 2783 / 11060 := by
   let z : ℝ := m / c
   have hms : 3 * m ^ 2 ≤ 2 * (m * s) := by nlinarith
   have hz_sq : 3 * z ^ 2 ≤ 2 * (m * s / (c ^ 2)) := by
@@ -74,21 +75,21 @@ private lemma step3_w1_algebra_83 {m s c : ℝ} (hc : 0 < c) (hm : 0 ≤ m) (h32
     have h1 : m ≤ 2 * (s - m) := by linarith
     calc m / (c * 2) ≤ (2 * (s - m)) / (c * 2) := div_le_div_of_nonneg_right h1 (by positivity)
       _ = (s - m) / c := by ring
-  have hsq : 0 ≤ (664 * z - 325) ^ 2 := sq_nonneg _
+  have hsq : 0 ≤ (12444 * z - 6061) ^ 2 := sq_nonneg _
   dsimp [z] at hz_sq hsm hsq
   linarith
 
-private lemma step4_final_contradiction_83 {g x qW a t₁ t₂ t₃ m₃ : ℝ}
-    (hg_gt : 83 / 80 + (1059 / 680) * (t₁ + t₂ + t₃) < g)
-    (hstep3 : g - (100 / 83) * x + qW ≥
-      (13 / 25) * g - (197 / 250) * a - (101 / 200) * (1 - a) + (33 / 50) * m₃)
-    (hcut3 : g - (100 / 83) * x + qW <
-      (133 / 166) * t₁ + (183 / 166) * t₂ + (100 / 83) * m₃ - a ^ 2 / 4 - a * (1 - a) / 2)
+private lemma cut_contradiction {g x qW a t₁ t₂ t₃ m₃ : ℝ}
+    (hg_gt : 19703 / 19028 + (22112 / 14271) * (t₁ + t₂ + t₃) < g)
+    (hstep3 : g - (1250 / 1037) * x + qW ≥
+      (15 / 29) * g - (2128 / 2715) * a - (1387 / 2765) * (1 - a) + (1 / 2) * m₃)
+    (hcut3 : g - (1250 / 1037) * x + qW <
+      (831 / 1037) * t₁ + (2287 / 2074) * t₂ + (1250 / 1037) * m₃ - a ^ 2 / 4 - a * (1 - a) / 2)
     (ht1_nn : 0 ≤ t₁)
     (ht2_le : t₂ ≤ a * (1 - a))
     (hm3_nn : 0 ≤ m₃)
     (hm3_t3 : m₃ ≤ t₃) : False := by
-  have hsq : 0 ≤ (60089 * a - 53326) ^ 2 := sq_nonneg _
+  have hsq : 0 ≤ (44046246448995 * a - 35840809478596) ^ 2 := sq_nonneg _
   linarith
 
 private lemma finset_disjoint_filter_neg {α : Type*} (s : Finset α) (p : α → Prop) [DecidablePred p] :
@@ -311,12 +312,12 @@ private lemma exists_feedback_of_good_cut
       ∃ (F : Finset ({z : V // z ∈ S} × {z : V // z ∈ S})) (r : {z : V // z ∈ S} → ℕ),
         Function.Injective r ∧
         (∀ x y, (H.induce S).adj x y → (x, y) ∉ F → r y < r x) ∧
-        200 * F.card ≤ 83 * (H.induce S).ordNonEdges)
-    (hgood : 200 * H.tauReal v side ≤ 83 * H.ordRhoReal v side) :
+        2500 * F.card ≤ 1037 * (H.induce S).ordNonEdges)
+    (hgood : 2500 * H.tauReal v side ≤ 1037 * H.ordRhoReal v side) :
     ∃ (F : Finset (V × V)) (rank : V → ℕ),
       Function.Injective rank ∧
       (∀ u w : V, H.adj u w → (u, w) ∉ F → rank w < rank u) ∧
-      200 * F.card ≤ 83 * H.ordNonEdges := by
+      2500 * F.card ≤ 1037 * H.ordNonEdges := by
   let CA : Finset V := (H.CSet v).filter fun u => side u = true
   let CB : Finset V := (H.CSet v).filter fun u => side u = false
   let V₂ : Finset V := H.ASet v ∪ CA
@@ -614,9 +615,9 @@ private lemma exists_feedback_of_good_cut
             simp only [rank, hu2, huv, hw2, hwv, ↓reduceDIte]
             have hlt1 := hr₁_dag ⟨u, hu1⟩ ⟨w, hw1⟩ huw (hnotF₁ hu1 hw1)
             omega
-  have hcard_real : 200 * (F.card : ℝ) ≤ 83 * (H.ordNonEdges : ℝ) := by
-    have h1 : 200 * (F₁.card : ℝ) ≤ 83 * ((H.induce V₁).ordNonEdges : ℝ) := by exact_mod_cast hF₁_card
-    have h2 : 200 * (F₂.card : ℝ) ≤ 83 * ((H.induce V₂).ordNonEdges : ℝ) := by exact_mod_cast hF₂_card
+  have hcard_real : 2500 * (F.card : ℝ) ≤ 1037 * (H.ordNonEdges : ℝ) := by
+    have h1 : 2500 * (F₁.card : ℝ) ≤ 1037 * ((H.induce V₁).ordNonEdges : ℝ) := by exact_mod_cast hF₁_card
+    have h2 : 2500 * (F₂.card : ℝ) ≤ 1037 * ((H.induce V₂).ordNonEdges : ℝ) := by exact_mod_cast hF₂_card
     linarith [hF_card_le, hE_cut_eq, hgood, hNonEdge_le]
   refine ⟨F, rank, hrank_inj, hrank_dag, ?_⟩
   exact_mod_cast hcard_real
@@ -747,25 +748,25 @@ private lemma sum_CSet_nonAdj_eq (v : V) :
   linarith
 
 
-private lemma exists_pivot_vertex_83 [Nonempty V] (hH : H.TriangleFree)
-    (hbad : ∀ (v : V) (side : V → Bool), 83 * H.ordRhoReal v side < 200 * H.tauReal v side) :
+private lemma exists_pivot_vertex [Nonempty V] (hH : H.TriangleFree)
+    (hbad : ∀ (v : V) (side : V → Bool), 1037 * H.ordRhoReal v side < 2500 * H.tauReal v side) :
     ∃ v : V, 1 ≤ (H.CSet v).card ∧
-      (83 / 80 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
-        (1059 / 680 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
+      (19703 / 19028 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
+        (22112 / 14271 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
       (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) := by
   let K : ℝ := omegaCard V
   have hK_pos : 0 < K := omegaCard_pos
   have h_omega_eval : ∀ v : V,
-      ∑ ω : V → Bool, (83 * H.ordRhoReal v ω - 200 * H.tauReal v ω) =
-      K * (166 * ((H.CSet v).card : ℝ) +
-        (83 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1) -
+      ∑ ω : V → Bool, (1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω) =
+      K * (2074 * ((H.CSet v).card : ℝ) +
+        (1037 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1) -
           2 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) +
-        166 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
-        83 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
-        83 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
-        100 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
-        100 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) -
-        50 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) := by
+        2074 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
+        1037 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
+        1037 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
+        1250 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
+        1250 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) -
+        625 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) := by
     intro v
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
     unfold ordRhoReal tauReal
@@ -832,60 +833,60 @@ private lemma exists_pivot_vertex_83 [Nonempty V] (hH : H.TriangleFree)
       H.sum_CSet_nonAdj_eq v]
     ring
   have hsum_unif_neg : ∑ v : V,
-      (166 * ((H.CSet v).card : ℝ) +
-        (83 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
-        33 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-        34 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
+      (2074 * ((H.CSet v).card : ℝ) +
+        (1037 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
+        412 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+        426 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
     have _ : Nonempty (V → Bool) := ⟨fun _ => false⟩
     have htotal_neg : ∑ v : V,
-        (∑ ω : V → Bool, (83 * H.ordRhoReal v ω - 200 * H.tauReal v ω)) < 0 := by
+        (∑ ω : V → Bool, (1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω)) < 0 := by
       have hlt_each : ∀ v ∈ (Finset.univ : Finset V),
-          ∑ ω : V → Bool, (83 * H.ordRhoReal v ω - 200 * H.tauReal v ω) < 0 := by
+          ∑ ω : V → Bool, (1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω) < 0 := by
         intro v _
         have hlt_ω : ∀ ω ∈ (Finset.univ : Finset (V → Bool)),
-            83 * H.ordRhoReal v ω - 200 * H.tauReal v ω < 0 :=
+            1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω < 0 :=
           fun ω _ => sub_neg.mpr (hbad v ω)
-        calc ∑ ω : V → Bool, (83 * H.ordRhoReal v ω - 200 * H.tauReal v ω)
+        calc ∑ ω : V → Bool, (1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω)
             < ∑ _ω : V → Bool, (0 : ℝ) := Finset.sum_lt_sum_of_nonempty Finset.univ_nonempty hlt_ω
           _ = 0 := by simp
-      calc ∑ v : V, (∑ ω : V → Bool, (83 * H.ordRhoReal v ω - 200 * H.tauReal v ω))
+      calc ∑ v : V, (∑ ω : V → Bool, (1037 * H.ordRhoReal v ω - 2500 * H.tauReal v ω))
           < ∑ _v : V, (0 : ℝ) := Finset.sum_lt_sum_of_nonempty Finset.univ_nonempty hlt_each
         _ = 0 := by simp
     simp_rw [h_omega_eval, ← Finset.mul_sum] at htotal_neg
-    have hinner_neg : ∑ v : V, (166 * ((H.CSet v).card : ℝ) +
-        (83 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1) -
+    have hinner_neg : ∑ v : V, (2074 * ((H.CSet v).card : ℝ) +
+        (1037 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1) -
           2 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) +
-        166 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
-        83 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
-        83 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
-        100 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
-        100 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) -
-        50 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) < 0 := by nlinarith
+        2074 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
+        1037 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
+        1037 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
+        1250 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
+        1250 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) -
+        625 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w)) < 0 := by nlinarith
     simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum] at hinner_neg ⊢
     rw [H.triple_sum_eAC_eq_g hH, H.triple_sum_eCB_eq_g hH,
       H.triple_sum_eBarAC_eq_t, H.triple_sum_eBarBC_eq_t] at hinner_neg
     linarith
   have hsum_triv_neg : ∑ v : V,
-      (332 * ((H.CSet v).card : ℝ) +
-        332 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-        68 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
+      (4148 * ((H.CSet v).card : ℝ) +
+        4148 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+        852 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
     have hpt_triv : ∀ v : V,
-        (83 * H.ordRhoReal v (fun _ => false) - 200 * H.tauReal v (fun _ => false)) +
-        (83 * H.ordRhoReal v (fun _ => true) - 200 * H.tauReal v (fun _ => true)) =
-        332 * ((H.CSet v).card : ℝ) +
-        332 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
-        166 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
-        166 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
-        200 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
-        200 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) := by
+        (1037 * H.ordRhoReal v (fun _ => false) - 2500 * H.tauReal v (fun _ => false)) +
+        (1037 * H.ordRhoReal v (fun _ => true) - 2500 * H.tauReal v (fun _ => true)) =
+        4148 * ((H.CSet v).card : ℝ) +
+        4148 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b) +
+        2074 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.nonAdjInd a u) +
+        2074 * (∑ b ∈ H.BSet v, ∑ u ∈ H.CSet v, H.nonAdjInd b u) -
+        2500 * (∑ a ∈ H.ASet v, ∑ u ∈ H.CSet v, H.arcInd a u) -
+        2500 * (∑ u ∈ H.CSet v, ∑ b ∈ H.BSet v, H.arcInd u b) := by
       intro v
       unfold ordRhoReal tauReal
       simp only [↓reduceIte, one_mul, zero_mul, Bool.false_eq_true, Bool.true_eq_false,
         ne_eq, not_true_eq_false, and_false, false_and, Finset.sum_const_zero]
       ring
     have hlt_each : ∀ v ∈ (Finset.univ : Finset V),
-        (83 * H.ordRhoReal v (fun _ => false) - 200 * H.tauReal v (fun _ => false)) +
-        (83 * H.ordRhoReal v (fun _ => true) - 200 * H.tauReal v (fun _ => true)) < 0 := by
+        (1037 * H.ordRhoReal v (fun _ => false) - 2500 * H.tauReal v (fun _ => false)) +
+        (1037 * H.ordRhoReal v (fun _ => true) - 2500 * H.tauReal v (fun _ => true)) < 0 := by
       intro v _
       have h1 := hbad v (fun _ => false)
       have h2 := hbad v (fun _ => true)
@@ -898,23 +899,23 @@ private lemma exists_pivot_vertex_83 [Nonempty V] (hH : H.TriangleFree)
       H.triple_sum_eBarAC_eq_t, H.triple_sum_eBarBC_eq_t] at htot
     linarith
   have hsum_comb : ∑ v : V,
-      (34 * (166 * ((H.CSet v).card : ℝ) +
-          (83 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
-          33 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-          34 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) +
-       3 * (332 * ((H.CSet v).card : ℝ) +
-          332 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-          68 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b))) < 0 := by
+      (57 * (2074 * ((H.CSet v).card : ℝ) +
+          (1037 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
+          412 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+          426 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) +
+       5 * (4148 * ((H.CSet v).card : ℝ) +
+          4148 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+          852 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b))) < 0 := by
     rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
     linarith
   have hex_v : ∃ v : V,
-      34 * (166 * ((H.CSet v).card : ℝ) +
-          (83 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
-          33 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-          34 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) +
-      3 * (332 * ((H.CSet v).card : ℝ) +
-          332 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
-          68 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
+      57 * (2074 * ((H.CSet v).card : ℝ) +
+          (1037 / 2 : ℝ) * (((H.CSet v).card : ℝ) * (((H.CSet v).card : ℝ) - 1)) +
+          412 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+          426 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) +
+      5 * (4148 * ((H.CSet v).card : ℝ) +
+          4148 * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) -
+          852 * (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) < 0 := by
     by_contra hno
     push Not at hno
     have hnn : (0 : ℝ) ≤ ∑ v : V, _ := Finset.sum_nonneg (s := Finset.univ) fun v _ => hno v
@@ -1060,11 +1061,11 @@ private noncomputable def alphaW (v w : V) : ℝ :=
   (if w ∈ H.WASet v then ∑ w₂ ∈ H.WBSet v, H.arcInd w w₂
    else ∑ w₁ ∈ H.WASet v, H.arcInd w₁ w) / H.cCard v
 
-private lemma pivot_step1_norm_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
-    (hpivot : (83 / 80 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
-        (1059 / 680 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
+private lemma pivot_step1_norm {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
+    (hpivot : (19703 / 19028 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
+        (22112 / 14271 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
       (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b)) :
-    83 / 80 + (1059 / 680) * (H.t1Norm v + H.t2Norm v + H.t3Norm v) < H.gNorm v := by
+    19703 / 19028 + (22112 / 14271) * (H.t1Norm v + H.t2Norm v + H.t3Norm v) < H.gNorm v := by
   have hc2_pos : 0 < H.cCard v ^ 2 := sq_pos_of_pos (H.cCard_pos hc_ge1)
   have ht_split : ∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w =
       (∑ u ∈ H.USet v, ∑ u' ∈ H.USet v, H.arcInd u u') +
@@ -1073,17 +1074,17 @@ private lemma pivot_step1_norm_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
       (∑ w ∈ H.WSet v, ∑ w' ∈ H.WSet v, H.arcInd w w') := by
     conv_lhs => rw [← H.union_USet_WSet v]
     rw [sum_union_sum_union (H.disjoint_USet_WSet v) (H.disjoint_USet_WSet v)]; ring
-  have hpiv' : (83 / 80 : ℝ) * H.cCard v ^ 2 +
-      (1059 / 680 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) < H.gRaw v := hpivot
+  have hpiv' : (19703 / 19028 : ℝ) * H.cCard v ^ 2 +
+      (22112 / 14271 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) < H.gRaw v := hpivot
   rw [ht_split] at hpiv'
   have hdiv := (div_lt_div_iff_of_pos_right hc2_pos).mpr hpiv'
   unfold gNorm t1Norm t2Norm t3Norm
-  have heq : ((83 / 80 : ℝ) * H.cCard v ^ 2 +
-      (1059 / 680 : ℝ) * ((∑ u ∈ H.USet v, ∑ u' ∈ H.USet v, H.arcInd u u') +
+  have heq : ((19703 / 19028 : ℝ) * H.cCard v ^ 2 +
+      (22112 / 14271 : ℝ) * ((∑ u ∈ H.USet v, ∑ u' ∈ H.USet v, H.arcInd u u') +
         ((∑ u ∈ H.USet v, ∑ w ∈ H.WSet v, H.arcInd u w) +
           (∑ w ∈ H.WSet v, ∑ u ∈ H.USet v, H.arcInd w u)) +
         (∑ w ∈ H.WSet v, ∑ w' ∈ H.WSet v, H.arcInd w w'))) / (H.cCard v ^ 2) =
-      83 / 80 + (1059 / 680) *
+      19703 / 19028 + (22112 / 14271) *
         ((∑ u ∈ H.USet v, ∑ u' ∈ H.USet v, H.arcInd u u') / (H.cCard v ^ 2) +
         ((∑ u ∈ H.USet v, ∑ w ∈ H.WSet v, H.arcInd u w) +
           (∑ w ∈ H.WSet v, ∑ u ∈ H.USet v, H.arcInd w u)) / (H.cCard v ^ 2) +
@@ -1284,14 +1285,14 @@ private lemma c3_excl_W_bound (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.C
       ≤ (H.cCard v * H.qWRaw v) / (H.cCard v ^ 3) := div_le_div_of_nonneg_right h_raw_le hc3_pos.le
     _ = H.qWRaw v / (H.cCard v ^ 2) := by field_simp [hc_pos.ne']
 
-private lemma pivot_step3_83 (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
-    H.gNorm v - (100 / 83) * H.xNorm v + H.qWNorm v ≥
-      (13 / 25) * H.gNorm v - (197 / 250) * H.aNorm v - (101 / 200) * (1 - H.aNorm v) +
-        (33 / 50) * H.m3Norm v := by
+private lemma pivot_step3 (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
+    H.gNorm v - (1250 / 1037) * H.xNorm v + H.qWNorm v ≥
+      (15 / 29) * H.gNorm v - (2128 / 2715) * H.aNorm v - (1387 / 2765) * (1 - H.aNorm v) +
+        (1 / 2) * H.m3Norm v := by
   have hc_pos := H.cCard_pos hc_ge1
   have hc2_pos : 0 < H.cCard v ^ 2 := sq_pos_of_pos hc_pos
-  have hu_sum : ∑ u ∈ H.USet v, (100 / 83 : ℝ) * (((H.kFn v u : ℝ) + (H.lFn v u : ℝ)) / (2 * H.cCard v)) ≤
-      ∑ u ∈ H.USet v, ((12 / 25 : ℝ) * ((H.mFn v u : ℝ) * (H.sFn v u : ℝ) / (H.cCard v ^ 2)) + 197 / 250) := by
+  have hu_sum : ∑ u ∈ H.USet v, (1250 / 1037 : ℝ) * (((H.kFn v u : ℝ) + (H.lFn v u : ℝ)) / (2 * H.cCard v)) ≤
+      ∑ u ∈ H.USet v, ((14 / 29 : ℝ) * ((H.mFn v u : ℝ) * (H.sFn v u : ℝ) / (H.cCard v ^ 2)) + 2128 / 2715) := by
     refine Finset.sum_le_sum fun u hu => ?_
     have hu_f : 2 * (H.sFn v u : ℝ) ≤ 3 * (H.mFn v u : ℝ) := by
       exact_mod_cast (Finset.mem_filter.mp hu).2
@@ -1299,19 +1300,19 @@ private lemma pivot_step3_83 (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.CS
       have hnat : H.mFn v u ≤ H.sFn v u := le_trans (Nat.min_le_left _ _) (Nat.le_max_left _ _)
       exact_mod_cast hnat
     rw [← H.ms_sum v u]
-    exact step3_u_algebra_83 hc_pos (Nat.cast_nonneg _) hm_le_s hu_f
+    exact cut_bound_balanced hc_pos (Nat.cast_nonneg _) hm_le_s hu_f
   have hw_sum : ∑ w ∈ H.WSet v,
-      ((100 / 83 : ℝ) * ((H.mFn v w : ℝ) / H.cCard v) -
+      ((1250 / 1037 : ℝ) * ((H.mFn v w : ℝ) / H.cCard v) -
         H.alphaW v w * (((H.sFn v w : ℝ) - (H.mFn v w : ℝ)) / H.cCard v)) ≤
-      ∑ w ∈ H.WSet v, ((12 / 25 : ℝ) * ((H.mFn v w : ℝ) * (H.sFn v w : ℝ) / (H.cCard v ^ 2)) +
-        101 / 200 - (33 / 100) * H.alphaW v w) := by
+      ∑ w ∈ H.WSet v, ((14 / 29 : ℝ) * ((H.mFn v w : ℝ) * (H.sFn v w : ℝ) / (H.cCard v ^ 2)) +
+        1387 / 2765 - (1 / 4) * H.alphaW v w) := by
     refine Finset.sum_le_sum fun w hw => ?_
     have hw_f : ¬ (2 * H.sFn v w ≤ 3 * H.mFn v w) := (Finset.mem_filter.mp hw).2
     have h32 : 3 * (H.mFn v w : ℝ) ≤ 2 * (H.sFn v w : ℝ) := by
       have : 3 * H.mFn v w ≤ 2 * H.sFn v w := by omega
       exact_mod_cast this
-    have h0 := step3_w0_algebra_83 hc_pos (Nat.cast_nonneg _) h32
-    have h1 := step3_w1_algebra_83 hc_pos (Nat.cast_nonneg _) h32
+    have h0 := cut_bound_unbalanced hc_pos (Nat.cast_nonneg _) h32
+    have h1 := cut_bound_penalized hc_pos (Nat.cast_nonneg _) h32
     rcases H.alphaW_mem_Icc hc_ge1 w with ⟨ha0, ha1⟩
     nlinarith
   have hms_total : ∑ u ∈ H.CSet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ) ≤ H.cCard v * H.gRaw v := by
@@ -1321,32 +1322,32 @@ private lemma pivot_step3_83 (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.CS
       (∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) =
       ∑ u ∈ H.CSet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ) :=
     (Finset.sum_union (H.disjoint_USet_WSet v)).symm.trans (by rw [H.union_USet_WSet v])
-  have hu_lhs : ∑ u ∈ H.USet v, (100 / 83 : ℝ) * (((H.kFn v u : ℝ) + (H.lFn v u : ℝ)) / (2 * H.cCard v)) =
-      (100 / 83 : ℝ) * ((∑ u ∈ H.USet v, ((H.kFn v u : ℝ) + (H.lFn v u : ℝ))) / (2 * H.cCard v)) := by
+  have hu_lhs : ∑ u ∈ H.USet v, (1250 / 1037 : ℝ) * (((H.kFn v u : ℝ) + (H.lFn v u : ℝ)) / (2 * H.cCard v)) =
+      (1250 / 1037 : ℝ) * ((∑ u ∈ H.USet v, ((H.kFn v u : ℝ) + (H.lFn v u : ℝ))) / (2 * H.cCard v)) := by
     rw [← Finset.mul_sum, ← Finset.sum_div]
-  have hu_rhs : ∑ u ∈ H.USet v, ((12 / 25 : ℝ) * ((H.mFn v u : ℝ) * (H.sFn v u : ℝ) / (H.cCard v ^ 2)) + 197 / 250) =
-      (12 / 25 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / (H.cCard v ^ 2)) +
-        ((H.USet v).card : ℝ) * (197 / 250) := by
+  have hu_rhs : ∑ u ∈ H.USet v, ((14 / 29 : ℝ) * ((H.mFn v u : ℝ) * (H.sFn v u : ℝ) / (H.cCard v ^ 2)) + 2128 / 2715) =
+      (14 / 29 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / (H.cCard v ^ 2)) +
+        ((H.USet v).card : ℝ) * (2128 / 2715) := by
     rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.sum_div, Finset.sum_const, nsmul_eq_mul]
   have hw_lhs : ∑ w ∈ H.WSet v,
-      ((100 / 83 : ℝ) * ((H.mFn v w : ℝ) / H.cCard v) -
+      ((1250 / 1037 : ℝ) * ((H.mFn v w : ℝ) / H.cCard v) -
         H.alphaW v w * (((H.sFn v w : ℝ) - (H.mFn v w : ℝ)) / H.cCard v)) =
-      (100 / 83 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ)) / H.cCard v) -
+      (1250 / 1037 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ)) / H.cCard v) -
       ∑ w ∈ H.WSet v, H.alphaW v w * (((H.sFn v w : ℝ) - (H.mFn v w : ℝ)) / H.cCard v) := by
     rw [Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.sum_div]
-  have hw_rhs : ∑ w ∈ H.WSet v, ((12 / 25 : ℝ) * ((H.mFn v w : ℝ) * (H.sFn v w : ℝ) / (H.cCard v ^ 2)) +
-        101 / 200 - (33 / 100) * H.alphaW v w) =
-      (12 / 25 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / (H.cCard v ^ 2)) +
-        ((H.WSet v).card : ℝ) * (101 / 200) - (33 / 100) * (∑ w ∈ H.WSet v, H.alphaW v w) := by
+  have hw_rhs : ∑ w ∈ H.WSet v, ((14 / 29 : ℝ) * ((H.mFn v w : ℝ) * (H.sFn v w : ℝ) / (H.cCard v ^ 2)) +
+        1387 / 2765 - (1 / 4) * H.alphaW v w) =
+      (14 / 29 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / (H.cCard v ^ 2)) +
+        ((H.WSet v).card : ℝ) * (1387 / 2765) - (1 / 4) * (∑ w ∈ H.WSet v, H.alphaW v w) := by
     rw [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.sum_div,
       Finset.sum_const, nsmul_eq_mul, ← Finset.mul_sum]
   rw [hu_lhs, hu_rhs] at hu_sum
   rw [hw_lhs, hw_rhs] at hw_sum
   have hdiv_c := div_le_div_of_nonneg_right (add_le_add hu_sum hw_sum) hc_pos.le
-  have h_lhs_eq : ((100 / 83 : ℝ) * ((∑ u ∈ H.USet v, ((H.kFn v u : ℝ) + (H.lFn v u : ℝ))) / (2 * H.cCard v)) +
-      ((100 / 83 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ)) / H.cCard v) -
+  have h_lhs_eq : ((1250 / 1037 : ℝ) * ((∑ u ∈ H.USet v, ((H.kFn v u : ℝ) + (H.lFn v u : ℝ))) / (2 * H.cCard v)) +
+      ((1250 / 1037 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ)) / H.cCard v) -
         ∑ w ∈ H.WSet v, H.alphaW v w * (((H.sFn v w : ℝ) - (H.mFn v w : ℝ)) / H.cCard v))) / H.cCard v =
-      (100 / 83) * H.xNorm v -
+      (1250 / 1037) * H.xNorm v -
         (∑ w ∈ H.WSet v, H.alphaW v w * (((H.sFn v w : ℝ) - (H.mFn v w : ℝ)) / H.cCard v)) / H.cCard v := by
     unfold xNorm; rw [← Finset.sum_div]; field_simp [hc_pos.ne']; ring
   have h12 : (((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) +
@@ -1356,24 +1357,24 @@ private lemma pivot_step3_83 (hH : H.TriangleFree) {v : V} (hc_ge1 : 1 ≤ (H.CS
         ≤ ((H.cCard v * H.gRaw v) / H.cCard v ^ 2) / H.cCard v :=
           div_le_div_of_nonneg_right (div_le_div_of_nonneg_right hms_total hc2_pos.le) hc_pos.le
       _ = H.gRaw v / H.cCard v ^ 2 := by field_simp [hc_pos.ne']
-  have h_rhs_le : (((12 / 25 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / H.cCard v ^ 2) +
-      ((H.USet v).card : ℝ) * (197 / 250)) +
-      ((12 / 25 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / H.cCard v ^ 2) +
-      ((H.WSet v).card : ℝ) * (101 / 200) - (33 / 100) * (∑ w ∈ H.WSet v, H.alphaW v w))) / H.cCard v ≤
-      (12 / 25) * H.gNorm v + (197 / 250) * H.aNorm v + (101 / 200) * (1 - H.aNorm v) -
-        (33 / 50) * H.m3Norm v := by
+  have h_rhs_le : (((14 / 29 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / H.cCard v ^ 2) +
+      ((H.USet v).card : ℝ) * (2128 / 2715)) +
+      ((14 / 29 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / H.cCard v ^ 2) +
+      ((H.WSet v).card : ℝ) * (1387 / 2765) - (1 / 4) * (∑ w ∈ H.WSet v, H.alphaW v w))) / H.cCard v ≤
+      (14 / 29) * H.gNorm v + (2128 / 2715) * H.aNorm v + (1387 / 2765) * (1 - H.aNorm v) -
+        (1 / 2) * H.m3Norm v := by
     have hw_c : ((H.WSet v).card : ℝ) / H.cCard v = 1 - H.aNorm v := (H.one_sub_aNorm hc_ge1).symm
     have ha_c : ((H.USet v).card : ℝ) / H.cCard v = H.aNorm v := rfl
     have hm3_c : (∑ w ∈ H.WSet v, H.alphaW v w) / H.cCard v = 2 * H.m3Norm v := H.sum_alphaW_eq hc_ge1
-    have hrearr : (((12 / 25 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / H.cCard v ^ 2) +
-        ((H.USet v).card : ℝ) * (197 / 250)) +
-        ((12 / 25 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / H.cCard v ^ 2) +
-        ((H.WSet v).card : ℝ) * (101 / 200) - (33 / 100) * (∑ w ∈ H.WSet v, H.alphaW v w))) / H.cCard v =
-        (12 / 25 : ℝ) * ((((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) +
+    have hrearr : (((14 / 29 : ℝ) * ((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) / H.cCard v ^ 2) +
+        ((H.USet v).card : ℝ) * (2128 / 2715)) +
+        ((14 / 29 : ℝ) * ((∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ)) / H.cCard v ^ 2) +
+        ((H.WSet v).card : ℝ) * (1387 / 2765) - (1 / 4) * (∑ w ∈ H.WSet v, H.alphaW v w))) / H.cCard v =
+        (14 / 29 : ℝ) * ((((∑ u ∈ H.USet v, (H.mFn v u : ℝ) * (H.sFn v u : ℝ)) +
           (∑ w ∈ H.WSet v, (H.mFn v w : ℝ) * (H.sFn v w : ℝ))) / H.cCard v ^ 2) / H.cCard v) +
-        (((H.USet v).card : ℝ) / H.cCard v) * (197 / 250) +
-        (((H.WSet v).card : ℝ) / H.cCard v) * (101 / 200) -
-        (33 / 100) * ((∑ w ∈ H.WSet v, H.alphaW v w) / H.cCard v) := by
+        (((H.USet v).card : ℝ) / H.cCard v) * (2128 / 2715) +
+        (((H.WSet v).card : ℝ) / H.cCard v) * (1387 / 2765) -
+        (1 / 4) * ((∑ w ∈ H.WSet v, H.alphaW v w) / H.cCard v) := by
       field_simp [hc_pos.ne']; ring
     rw [hrearr, ha_c, hw_c, hm3_c]; linarith
   have hqW := H.c3_excl_W_bound hH hc_ge1
@@ -1536,7 +1537,7 @@ private lemma pivot_UW_nonAdj_id {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
 private def side3Cut (v : V) (ω : V → Bool) (z : V) : Bool :=
   if z ∈ H.USet v then ω z else decide (z ∈ H.WASet v)
 
-private lemma pivot_cut3_rho_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
+private lemma pivot_cut3_rho {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
     omegaCard V * (2 * H.gRaw v + 2 * H.qWRaw v +
       H.aNorm v ^ 2 * H.cCard v ^ 2 / 2 - H.cCard v ^ 2 * H.t1Norm v +
       (((H.USet v).card : ℝ) * ((H.WSet v).card : ℝ) - H.cCard v ^ 2 * H.t2Norm v)) ≤
@@ -1844,25 +1845,25 @@ private lemma pivot_cut3_tau {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card) :
   linarith [hsum_pt, hrhs_eq]
 
 
-private lemma pivot_cut3_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
-    (hex_good : ∀ (side : V → Bool), 83 * H.ordRhoReal v side < 200 * H.tauReal v side) :
-    H.gNorm v - (100 / 83) * H.xNorm v + H.qWNorm v <
-      (133 / 166) * H.t1Norm v + (183 / 166) * H.t2Norm v + (100 / 83) * H.m3Norm v -
+private lemma pivot_cut3 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
+    (hex_good : ∀ (side : V → Bool), 1037 * H.ordRhoReal v side < 2500 * H.tauReal v side) :
+    H.gNorm v - (1250 / 1037) * H.xNorm v + H.qWNorm v <
+      (831 / 1037) * H.t1Norm v + (2287 / 2074) * H.t2Norm v + (1250 / 1037) * H.m3Norm v -
         H.aNorm v ^ 2 / 4 - H.aNorm v * (1 - H.aNorm v) / 2 := by
   have hc_pos := H.cCard_pos hc_ge1
   have hc2_pos : 0 < H.cCard v ^ 2 := sq_pos_of_pos hc_pos
   let K : ℝ := omegaCard V
   have hK_pos : 0 < K := omegaCard_pos
   have _ : Nonempty (V → Bool) := ⟨fun _ => false⟩
-  have hsum_bad3 : 83 * (∑ ω : V → Bool, H.ordRhoReal v (H.side3Cut v ω)) <
-      200 * (∑ ω : V → Bool, H.tauReal v (H.side3Cut v ω)) := by
+  have hsum_bad3 : 1037 * (∑ ω : V → Bool, H.ordRhoReal v (H.side3Cut v ω)) <
+      2500 * (∑ ω : V → Bool, H.tauReal v (H.side3Cut v ω)) := by
     have hlt : ∀ ω ∈ (Finset.univ : Finset (V → Bool)),
-        83 * H.ordRhoReal v (H.side3Cut v ω) - 200 * H.tauReal v (H.side3Cut v ω) < 0 :=
+        1037 * H.ordRhoReal v (H.side3Cut v ω) - 2500 * H.tauReal v (H.side3Cut v ω) < 0 :=
       fun ω _ => sub_neg.mpr (hex_good (H.side3Cut v ω))
     have hneg := Finset.sum_lt_sum_of_nonempty Finset.univ_nonempty hlt
     simp only [Finset.sum_const_zero, Finset.sum_sub_distrib, ← Finset.mul_sum] at hneg
     linarith
-  have hrho3 := H.pivot_cut3_rho_83 hc_ge1
+  have hrho3 := H.pivot_cut3_rho hc_ge1
   have htau3 := H.pivot_cut3_tau hc_ge1
   have ha1a_eq : H.aNorm v * (1 - H.aNorm v) * H.cCard v ^ 2 =
       ((H.USet v).card : ℝ) * ((H.WSet v).card : ℝ) := by
@@ -1870,9 +1871,9 @@ private lemma pivot_cut3_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
   have hg_eq : H.gNorm v * H.cCard v ^ 2 = H.gRaw v := by unfold gNorm; exact div_mul_cancel₀ _ hc2_pos.ne'
   have hq_eq : H.qWNorm v * H.cCard v ^ 2 = H.qWRaw v := by unfold qWNorm; exact div_mul_cancel₀ _ hc2_pos.ne'
   rw [← ha1a_eq, ← hg_eq, ← hq_eq] at hrho3
-  have hK_ineq : K * (H.cCard v ^ 2 * (166 * (H.gNorm v - (100 / 83) * H.xNorm v + H.qWNorm v))) <
-      K * (H.cCard v ^ 2 * (166 * ((133 / 166) * H.t1Norm v + (183 / 166) * H.t2Norm v +
-        (100 / 83) * H.m3Norm v - H.aNorm v ^ 2 / 4 - H.aNorm v * (1 - H.aNorm v) / 2))) := by
+  have hK_ineq : K * (H.cCard v ^ 2 * (2074 * (H.gNorm v - (1250 / 1037) * H.xNorm v + H.qWNorm v))) <
+      K * (H.cCard v ^ 2 * (2074 * ((831 / 1037) * H.t1Norm v + (2287 / 2074) * H.t2Norm v +
+        (1250 / 1037) * H.m3Norm v - H.aNorm v ^ 2 / 4 - H.aNorm v * (1 - H.aNorm v) / 2))) := by
     change K * _ ≤ _ at hrho3
     change _ ≤ K * _ at htau3
     linarith [hsum_bad3, hrho3, htau3]
@@ -1880,22 +1881,22 @@ private lemma pivot_cut3_83 {v : V} (hc_ge1 : 1 ≤ (H.CSet v).card)
   have h2 := lt_of_mul_lt_mul_left h1 hc2_pos.le
   linarith
 
-private lemma pivot_contradiction_83 (hH : H.TriangleFree) (v : V)
+private lemma pivot_contradiction (hH : H.TriangleFree) (v : V)
     (hc_ge1 : 1 ≤ (H.CSet v).card)
-    (hpivot : (83 / 80 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
-        (1059 / 680 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
+    (hpivot : (19703 / 19028 : ℝ) * ((H.CSet v).card : ℝ) ^ 2 +
+        (22112 / 14271 : ℝ) * (∑ u ∈ H.CSet v, ∑ w ∈ H.CSet v, H.arcInd u w) <
       (∑ a ∈ H.ASet v, ∑ b ∈ H.BSet v, H.nonAdjInd a b))
-    (hex_good : ∀ (side : V → Bool), 83 * H.ordRhoReal v side < 200 * H.tauReal v side) :
+    (hex_good : ∀ (side : V → Bool), 1037 * H.ordRhoReal v side < 2500 * H.tauReal v side) :
     False := by
   have hc2_nn : 0 ≤ H.cCard v ^ 2 := sq_nonneg _
   have ht1_nn : 0 ≤ H.t1Norm v :=
     div_nonneg (Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => H.arcInd_nonneg _ _) hc2_nn
   have hm3_nn : 0 ≤ H.m3Norm v :=
     div_nonneg (Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => H.arcInd_nonneg _ _) hc2_nn
-  exact step4_final_contradiction_83
-    (H.pivot_step1_norm_83 hc_ge1 hpivot)
-    (H.pivot_step3_83 hH hc_ge1)
-    (H.pivot_cut3_83 hc_ge1 hex_good)
+  exact cut_contradiction
+    (H.pivot_step1_norm hc_ge1 hpivot)
+    (H.pivot_step3 hH hc_ge1)
+    (H.pivot_cut3 hc_ge1 hex_good)
     ht1_nn
     (H.pivot_t2_le hc_ge1)
     hm3_nn
@@ -1903,22 +1904,22 @@ private lemma pivot_contradiction_83 (hH : H.TriangleFree) (v : V)
 
 /-- **CSS feedback arc set bound**
 Every finite simple `C₃`-free oriented graph `G` admits a feedback arc set `F` and an injective
-topological ranking `rank : W → ℕ` such that `200 * F.card ≤ 83 * G.ordNonEdges`
-(equivalently `100 * β(G) ≤ 83 * γ(G)`). -/
-theorem exists_feedback_200_card_le_83_ordNonEdges :
+topological ranking `rank : W → ℕ` such that `2500 * F.card ≤ 1037 * G.ordNonEdges`
+(equivalently `1250 * β(G) ≤ 1037 * γ(G)`). -/
+theorem exists_feedback_2500_card_le_1037_ordNonEdges :
     ∀ {W : Type u} [Fintype W] [DecidableEq W] (G : OrientedGraph W) [DecidableRel G.adj],
       G.TriangleFree →
       ∃ (F : Finset (W × W)) (rank : W → ℕ),
         Function.Injective rank ∧
         (∀ u w : W, G.adj u w → (u, w) ∉ F → rank w < rank u) ∧
-        200 * F.card ≤ 83 * G.ordNonEdges := by
+        2500 * F.card ≤ 1037 * G.ordNonEdges := by
   suffices hmain : ∀ n : ℕ, ∀ {W : Type u} [Fintype W] [DecidableEq W]
       (G : OrientedGraph W) [DecidableRel G.adj],
       Fintype.card W = n → G.TriangleFree →
       ∃ (F : Finset (W × W)) (rank : W → ℕ),
         Function.Injective rank ∧
         (∀ u w : W, G.adj u w → (u, w) ∉ F → rank w < rank u) ∧
-        200 * F.card ≤ 83 * G.ordNonEdges by
+        2500 * F.card ≤ 1037 * G.ordNonEdges by
     intro W _ _ G _ hG
     exact hmain (Fintype.card W) G rfl hG
   intro n
@@ -1926,20 +1927,40 @@ theorem exists_feedback_200_card_le_83_ordNonEdges :
   | ind n ih =>
     intro W _ _ G _ hn hG
     by_cases hne : Nonempty W
-    · by_cases hex_good : ∃ (v : W) (side : W → Bool), 200 * G.tauReal v side ≤ 83 * G.ordRhoReal v side
+    · by_cases hex_good : ∃ (v : W) (side : W → Bool), 2500 * G.tauReal v side ≤ 1037 * G.ordRhoReal v side
       · rcases hex_good with ⟨v, side, hgood⟩
         exact G.exists_feedback_of_good_cut hG v side
           (fun S hS => ih S.card (hn ▸ hS) (G.induce S) (Fintype.card_coe S) (G.triangleFree_induce hG S))
           hgood
       · exfalso
         push Not at hex_good
-        obtain ⟨v, hc_ge1, hpivot⟩ := G.exists_pivot_vertex_83 hG hex_good
-        exact G.pivot_contradiction_83 hG v hc_ge1 hpivot (hex_good v)
+        obtain ⟨v, hc_ge1, hpivot⟩ := G.exists_pivot_vertex hG hex_good
+        exact G.pivot_contradiction hG v hc_ge1 hpivot (hex_good v)
     · rw [not_nonempty_iff] at hne
       refine ⟨∅, isEmptyElim, fun x => isEmptyElim x, fun x => isEmptyElim x, ?_⟩
       simp
 
 end CSS83
+
+/-- The earlier feedback bound follows from the strengthened cut argument. -/
+theorem exists_feedback_200_card_le_83_ordNonEdges
+    {W : Type u} [Fintype W] [DecidableEq W] (G : OrientedGraph W) [DecidableRel G.adj]
+    (hG : G.TriangleFree) :
+    ∃ (F : Finset (W × W)) (rank : W → ℕ), Function.Injective rank ∧
+      (∀ u w : W, G.adj u w → (u,w) ∉ F → rank w < rank u) ∧
+      200 * F.card ≤ 83 * G.ordNonEdges := by
+  obtain ⟨F, rank, hinj, hdag, hcard⟩ := G.exists_feedback_2500_card_le_1037_ordNonEdges hG
+  exact ⟨F, rank, hinj, hdag, by omega⟩
+
+/-- The strengthened feedback bound in the out-degree form used by pointwise CSS. -/
+theorem outDeg_sq_le_1037_ordNonEdges {W : Type u} [Fintype W] [DecidableEq W] [Nonempty W]
+    (G : OrientedGraph W) [DecidableRel G.adj] (hG : G.TriangleFree) {d : ℕ}
+    (hd : ∀ v, d ≤ G.toDigraph.outDeg v) :
+    1250 * (d * (d + 1)) ≤ 1037 * G.ordNonEdges := by
+  obtain ⟨F, rank, hinj, hdag, hcard⟩ := G.exists_feedback_2500_card_le_1037_ordNonEdges hG
+  have hfb := deg_sq_le_two_card_feedback d G F rank hinj hdag hd
+  omega
+
 
 /-- **Out-degree corollary (`α_CSS = 83/100`)**:
 In ANY finite nonempty `C₃`-free oriented graph `H` where every vertex has out-degree `≥ d`,
@@ -1961,6 +1982,15 @@ theorem exists_hundred_outDeg_sq_le_83_ordNonEdges {V : Type u} [Fintype V] [Dec
     Finset.exists_min_image Finset.univ (H.toDigraph.outDeg) Finset.univ_nonempty
   exact ⟨w, H.hundred_outDeg_sq_le_83_ordNonEdges hH (fun u => hw_min u (Finset.mem_univ u))⟩
 
+/-- Every finite nonempty `C₃`-free oriented graph `H` has a vertex `w` satisfying
+`1250 * (outDeg H w * (outDeg H w + 1)) ≤ 1037 * H.ordNonEdges`. -/
+theorem exists_outDeg_sq_le_1037_ordNonEdges {V : Type u} [Fintype V] [DecidableEq V] [Nonempty V]
+    (H : OrientedGraph V) [DecidableRel H.adj] (hH : H.TriangleFree) :
+    ∃ w : V, 1250 * (H.toDigraph.outDeg w * (H.toDigraph.outDeg w + 1)) ≤ 1037 * H.ordNonEdges := by
+  obtain ⟨w, _, hw_min⟩ :=
+    Finset.exists_min_image Finset.univ (H.toDigraph.outDeg) Finset.univ_nonempty
+  exact ⟨w, H.outDeg_sq_le_1037_ordNonEdges hH (fun u => hw_min u (Finset.mem_univ u))⟩
+
 end OrientedGraph
 
 /-- **Feedback arc set bound for a 3-free digraph**
@@ -1979,5 +2009,22 @@ theorem Digraph.exists_feedback_200_card_le_83_ordNonEdges
   let H : OrientedGraph V := G.toOrientedOfNotHasDigon hnodigon
   let _ : DecidableRel H.adj := dG
   exact H.exists_feedback_200_card_le_83_ordNonEdges hnotri
+
+/-- **Feedback arc set bound for a 3-free digraph**
+Every finite simple digraph `G` with no directed cycle of length `≤ 3` (`¬ G.HasCycleLe3`) admits
+a feedback arc set `F` and an injective topological ranking `rank : V → ℕ` such that
+`2500 * F.card ≤ 1037 * G.ordNonEdges` (equivalently `1250 * β(G) ≤ 1037 * γ(G)`). -/
+theorem Digraph.exists_feedback_2500_card_le_1037_ordNonEdges
+    {V : Type u} [Fintype V] [DecidableEq V]
+    (G : Digraph V) [dG : DecidableRel G.adj] (h3free : ¬ G.HasCycleLe3) :
+    ∃ (F : Finset (V × V)) (rank : V → ℕ),
+      Function.Injective rank ∧
+      (∀ u w : V, G.adj u w → (u, w) ∉ F → rank w < rank u) ∧
+      2500 * F.card ≤ 1037 * G.ordNonEdges := by
+  have hnodigon : ¬ G.HasDigon := fun hd => h3free (Or.inl hd)
+  have hnotri : ¬ G.HasDirTriangle := fun ht => h3free (Or.inr ht)
+  let H : OrientedGraph V := G.toOrientedOfNotHasDigon hnodigon
+  let _ : DecidableRel H.adj := dG
+  exact H.exists_feedback_2500_card_le_1037_ordNonEdges hnotri
 
 end CaccettaHaggkvist

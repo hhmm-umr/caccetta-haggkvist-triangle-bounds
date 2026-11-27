@@ -1,14 +1,15 @@
 module
 
 public import CaccettaHaggkvist.IntervalM6Bridge
-public import CaccettaHaggkvist.RazborovSharp
+public import CaccettaHaggkvist.PatternPacking
 public import CaccettaHaggkvist.RainbowBounds
-public import CaccettaHaggkvist.WeightedFlags
+public import CaccettaHaggkvist.SixVertexBound
+public import CaccettaHaggkvist.SixVertexGeometry
+public import CaccettaHaggkvist.GramPacking
 
 /-!
 # Caccetta–Häggkvist bounds
 
-The public entry point includes the five-vertex interval certificate, the six-vertex
-classification, the CSS feedback bound, the forbidden-pattern theorem and the rainbow
-triangle consequences.
+The default build includes the five-vertex CH theorem, the feedback and packing
+bounds, the rainbow corollaries and the soundness of the six-vertex certificate checker.
 -/

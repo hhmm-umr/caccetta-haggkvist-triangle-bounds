@@ -19,10 +19,12 @@ python3 "$solver/verify_cert_independent.py" "$work/flags_m5.bin" \
 python3 "$solver/verify_ext_cert_independent.py" "$work/flags_m5.bin" "$work/ext_m5.bin" \
     "$certs/cert_m5_tier1_linonly_427_1250_to_689_2000.json"
 six=("$certs/cert_m6_css83_sos_3383_10000_to_427_1250.json"
-     "$certs/cert_m6_css83_nosos_677_2000_to_427_1250.json")
+     "$certs/cert_m6_css83_nosos_677_2000_to_427_1250.json"
+     "$certs/cert_m6_css83_33827_100000_to_427_1250.json"
+     "$certs/cert_m6_css1037_33823_100000_to_33827_100000.json")
 for cert in "${six[@]}"; do
     python3 "$solver/verify_ext_cert_independent.py" "$work/flags_m6.bin" "$work/ext_m6.bin" \
         "$cert"
 done
 python3 "$solver/verify_six_vertex.py" "$certs/canon_witnesses_m6.json" \
-    "$work/flags_m6.bin" "$work/ext_m6.bin" "${six[@]}"
+    "$work/flags_m6.bin" "$work/ext_m6.bin" "${six[@]}" --anchor 427/1250

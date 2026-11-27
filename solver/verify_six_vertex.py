@@ -10,6 +10,9 @@ import itertools
 import json
 import math
 import struct
+from collections import Counter
+from dataclasses import dataclass
+from functools import lru_cache
 from fractions import Fraction
 from pathlib import Path
 
@@ -121,7 +124,7 @@ def embed(graph, order, positions):
 def make_terms(cert, metadata):
     degree, base, ind, css, sos_ind, sos_css = metadata
     alpha = Fraction(integer(cert["alpha_num"]), integer(cert["alpha_den"]))
-    require(alpha >= Fraction(83, 100), "the CSS theorem must cover the chosen coefficient")
+    require(alpha >= Fraction(1037, 1250), "the CSS theorem must cover the chosen coefficient")
     tangents = [Fraction(integer(a), integer(b)) for a, b in cert["r_fracs"]]
     weighted_tangents = [Fraction(integer(a), integer(b)) for a, b in cert["r_sos_fracs"]]
     require(all(r >= 0 for r in tangents + weighted_tangents), "negative tangent")
@@ -227,39 +230,114 @@ def make_terms(cert, metadata):
     return tables, normalizer, Fraction(loss, integer(cert["q_denom"]))
 
 
-def evaluate(cert, models, metadata):
-    lo = Fraction(integer(cert["c_low_num"]), integer(cert["c_low_den"]))
-    hi = Fraction(integer(cert["c_high_num"]), integer(cert["c_high_den"]))
-    require(0 < lo < hi <= 1 and cert["m"] == 6 and cert["num_models"] == len(models),
-            "incorrect interval or model count")
-    tables, normalizer, loss = make_terms(cert, metadata)
-    base = [(mask, t) for (kind, _, mask), t in tables.items() if kind == "base"]
-    ind = [(k, mask, t) for (kind, k, mask), t in tables.items() if kind == "ind"]
-    css = [(k, mask, t) for (kind, k, mask), t in tables.items() if kind == "css"]
-    degree = tables["degree", 0, (1 << 20) - 1]
+def permutation_words():
+    """Return the exact orbit with multiplicities, sharing the action on five-edge chunks."""
+    orders = list(itertools.permutations(range(6)))
+    pairs = list(itertools.combinations(range(6), 2))
+    digits = [[[], [], []] for _ in pairs]
+    for order in orders:
+        inverse = {vertex: i for i, vertex in enumerate(order)}
+        for edge, (a, b) in enumerate(pairs):
+            i, j = inverse[a], inverse[b]
+            shift = pair_shift(min(i, j), max(i, j))
+            digits[edge][1].append((1 if i < j else 2) << shift)
+            digits[edge][2].append((2 if i < j else 1) << shift)
 
-    # Each two-bit digit in row j gives the orientation from an earlier root to j.
+    @lru_cache(maxsize=3 * 243)
+    def chunk(start, code):
+        words = [0] * len(orders)
+        for edge in range(start, start + 5):
+            code, trit = divmod(code, 4)
+            require(trit < 3, "invalid edge in representative")
+            if trit:
+                words = [a | b for a, b in zip(words, digits[edge][trit])]
+        return words
+
+    def orbit(code):
+        require(0 <= code < 1 << 30, "invalid six-vertex code")
+        parts = (chunk(0, code & 1023), chunk(5, (code >> 10) & 1023), chunk(10, code >> 20))
+        return Counter(a | b | c for a, b, c in zip(*parts))
+
+    return orbit
+
+
+@dataclass
+class AffineRows:
+    denominator: int
+    loss: Fraction
+    rows: list
+
+    def maximum(self, endpoint):
+        numerator = max(endpoint.denominator*u + endpoint.numerator*v for u, v in self.rows)
+        return Fraction(numerator, self.denominator * endpoint.denominator)
+
+    def lower_boundary(self):
+        # At the known strictly negative upper endpoint, only negative slopes
+        # constrain how far left the interval can extend.
+        return max(((Fraction(-u, v), i) for i, (u, v) in enumerate(self.rows) if v < 0),
+                   default=(Fraction(0), None))
+
+
+def affine_rows(certificates, models, metadata):
+    """Compute all model intercepts/slopes once. Each signed lane is one certificate."""
+    require(bool(certificates) and len(models) == 6583, "expected certificates and all six-vertex models")
+    compiled = [make_terms(cert, metadata) for cert in certificates]
+    results = [AffineRows(720 * normalizer, loss, []) for _, normalizer, loss in compiled]
+
+    # Even after summing 720 orderings, the absolute value in every lane is
+    # below half the radix. Signed packing is linear, including negative inputs.
+    bound = 0
+    for tables, _, _ in compiled:
+        word_bound = 0
+        for (kind, _, _), table in tables.items():
+            if kind == "css":
+                magnitudes = (abs(a) + abs(b) + abs(c) for a, b, c in table.values())
+            else:
+                magnitudes = map(abs, table.values())
+            word_bound += max(magnitudes, default=0)
+        bound = max(bound, word_bound)
+    bits = (720 * bound).bit_length() + 1
+    radix = 1 << bits
+    combined = {}
+    for lane, (tables, _, _) in enumerate(compiled):
+        shift = bits * lane
+        for layout, table in tables.items():
+            out = combined.setdefault(layout, {})
+            if layout[0] == "css":
+                for key, (chi, src, const) in table.items():
+                    x, y, z = out.get(key, (0, 0, 0))
+                    out[key] = (x + (chi << shift), y + (src << shift), z + (const << shift))
+            else:
+                for key, value in table.items():
+                    out[key] = out.get(key, 0) + (value << shift)
+    del compiled
+    degree = combined["degree", 0, (1 << 20) - 1]
+    base = [(mask, q) for (kind, _, mask), q in combined.items() if kind == "base"]
+    ind = [(k, mask, q) for (kind, k, mask), q in combined.items() if kind == "ind"]
+    css = [(k, mask, q) for (kind, k, mask), q in combined.items() if kind == "css"]
     all_in, source = [], []
     for row in range(1 << 10):
         digits = [(row >> (2*i)) & 3 for i in range(5)]
         all_in.append([all(d == 1 for d in digits[:k]) for k in range(6)])
         source.append([2 not in digits[:k] and not all_in[row][k] for k in range(6)])
 
-    orders = list(itertools.permutations(range(6)))
-    positions = tuple(range(6))
-    denom = len(orders) * normalizer
-    maxima = [None, None]
-    max_slope = Fraction(0)
+    def take_lane(packed):
+        rest, value = divmod(packed, radix)
+        if value >= radix // 2:
+            return rest + 1, value - radix
+        return rest, value
+
+    orbit = permutation_words()
+    distinct = 0
     for code in models:
-        graph = decode(6, code)
-        u = v = 0
-        for order in orders:
-            word = embed(graph, order, positions)
+        words = orbit(code)
+        distinct += len(words)
+        total_u = total_v = 0
+        for word, count in words.items():
             row5, row4 = word >> 20, (word >> 12) & 255
             lam = degree.get(word & ((1 << 20) - 1), 0)
-            if row5 & 3 == 1:
-                u += lam
-            v -= lam
+            u = lam if row5 & 3 == 1 else 0
+            v = -lam
             for mask, q in base:
                 u += q.get(word & mask, 0)
             for k, mask, q in ind:
@@ -278,19 +356,49 @@ def evaluate(cert, models, metadata):
                         u += src
                     u += const
                     v -= src
-        max_slope = max(max_slope, Fraction(abs(v), denom))
-        for i, endpoint in enumerate((lo, hi)):
-            score = Fraction(u * endpoint.denominator + v * endpoint.numerator,
-                             denom * endpoint.denominator)
-            if maxima[i] is None or score > maxima[i]:
-                maxima[i] = score
-    for endpoint, actual, field in zip((lo, hi), maxima, ("max_S_low", "max_S_high")):
+            total_u += count * u
+            total_v += count * v
+        for result in results:
+            total_u, u = take_lane(total_u)
+            total_v, v = take_lane(total_v)
+            result.rows.append((u, v))
+        require(total_u == total_v == 0, "signed coefficient lane overflow")
+    return results, distinct
+
+
+def verify_rows(cert, scores):
+    lo = Fraction(integer(cert["c_low_num"]), integer(cert["c_low_den"]))
+    hi = Fraction(integer(cert["c_high_num"]), integer(cert["c_high_den"]))
+    require(0 < lo < hi <= 1 and cert["m"] == 6 and cert["num_models"] == len(scores.rows),
+            "incorrect interval or model count")
+    maxima = []
+    for endpoint, field in ((lo, "max_S_low"), (hi, "max_S_high")):
+        actual = scores.maximum(endpoint)
         require(actual < 0, f"nonnegative model at {endpoint}: {actual}")
         require(actual == Fraction(*map(integer, cert[field])), f"incorrect recorded maximum at {endpoint}")
+        maxima.append(actual)
         print(f"  {endpoint}: max = {actual}")
-    margin = -max(maxima)
-    epsilon = margin / (2 * (loss + max_slope + 1))
-    print(f"  {len(models)} models x {len(orders)} orderings; M = {loss}; B = {max_slope}; epsilon = {epsilon}")
+    slope = Fraction(max(abs(v) for _, v in scores.rows), scores.denominator)
+    epsilon = -max(maxima) / (2 * (scores.loss + slope + 1))
+    frontier, index = scores.lower_boundary()
+    print(f"  M = {scores.loss}; B = {slope}; epsilon = {epsilon}")
+    print(f"  lower boundary = {frontier}; active representative (zero-based) = {index}")
+    return max(Fraction(0), frontier)
+
+
+def evaluate(cert, models, metadata):
+    results, _ = affine_rows([cert], models, metadata)
+    verify_rows(cert, results[0])
+
+
+def extend_upper_bound(anchor, intervals):
+    """Chain overlapping checked intervals, including a zero at a sharp lower endpoint."""
+    bound = anchor
+    for high, low in sorted(intervals, reverse=True):
+        require(high >= bound or low >= bound, f"interval gap between {high} and {bound}")
+        if high >= bound:
+            bound = min(low, bound)
+    return bound
 
 
 def main():
@@ -299,12 +407,21 @@ def main():
     parser.add_argument("flags", type=Path)
     parser.add_argument("extensions", type=Path)
     parser.add_argument("certificates", type=Path, nargs="+")
+    parser.add_argument("--anchor", type=Fraction, help="established upper bound for interval chaining")
     args = parser.parse_args()
     models = checked_models(args.witnesses)
     metadata = flag_ids(args.flags, args.extensions)
-    for path in args.certificates:
+    certificates = [json.loads(path.read_bytes()) for path in args.certificates]
+    results, distinct = affine_rows(certificates, models, metadata)
+    print(f"{len(models)} models, {distinct} distinct labelings, {len(models)*720} weighted orderings")
+    intervals = []
+    for path, cert, scores in zip(args.certificates, certificates, results):
         print(f"Direct six-vertex evaluation: {path.name}", flush=True)
-        evaluate(json.loads(path.read_bytes()), models, metadata)
+        lower = verify_rows(cert, scores)
+        intervals.append((Fraction(integer(cert["c_high_num"]), integer(cert["c_high_den"])), lower))
+    if args.anchor is not None:
+        bound = extend_upper_bound(args.anchor, intervals)
+        print(f"Chained cStar upper bound from {args.anchor}: {bound} ({float(bound):.12f})")
 
 
 if __name__ == "__main__":

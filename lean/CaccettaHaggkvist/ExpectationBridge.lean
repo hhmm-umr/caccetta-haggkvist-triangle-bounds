@@ -222,13 +222,13 @@ def checkIndTree (k_orig r m_bdd : ℕ) (indTree : NTree) : Bool :=
     let v := indTree.get c
     (Nat.ble v m_bdd) && ((Nat.beq v 0) || codeHasSinkOrWitness k_orig r c))
 
-private def equivFin1 (α : Type*) : α ≃ (Fin 1 → α) where
+def equivFin1 (α : Type*) : α ≃ (Fin 1 → α) where
   toFun x _ := x
   invFun z := z 0
   left_inv _ := rfl
   right_inv z := by ext i; rw [Subsingleton.elim i 0]
 
-private lemma tupleWeight_unif_fin1 {n : ℕ} (x : Fin n) :
+lemma tupleWeight_unif_fin1 {n : ℕ} (x : Fin n) :
     tupleWeight (unifWeight (Fin n)) (equivFin1 (Fin n) x) = 1 / (n : ℝ) := by
   unfold tupleWeight unifWeight
   simp [Fintype.card_fin]
@@ -420,7 +420,7 @@ def checkCssTree (k_orig r : ℕ) (cssTree : NTree) : Bool :=
   allBelow (Nat.pow 3 (Nat.div (Nat.mul r (Nat.sub r 1)) 2)) (fun c =>
     (Nat.beq (cssTree.get c) 0) || codeHasSinkOrWitness k_orig r c)
 
-private def equivFin2 (α : Type*) : α × α ≃ (Fin 2 → α) where
+def equivFin2 (α : Type*) : α × α ≃ (Fin 2 → α) where
   toFun p := Fin.cases p.1 (fun _ => p.2)
   invFun z := (z 0, z 1)
   left_inv _ := rfl
@@ -428,7 +428,7 @@ private def equivFin2 (α : Type*) : α × α ≃ (Fin 2 → α) where
     ext i
     fin_cases i <;> rfl
 
-private lemma tupleWeight_unif_fin2 {n : ℕ} (p : Fin n × Fin n) :
+lemma tupleWeight_unif_fin2 {n : ℕ} (p : Fin n × Fin n) :
     tupleWeight (unifWeight (Fin n)) (equivFin2 (Fin n) p) = 1 / ((n : ℝ) ^ 2) := by
   unfold tupleWeight unifWeight
   rw [Fin.prod_univ_two]
